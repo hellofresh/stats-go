@@ -7,12 +7,15 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
+// StatsdStatsClient is StatsClient implementation for statsd
 type StatsdStatsClient struct {
 	client             *statsd.Client
 	muted              bool
 	httpMetricCallback HttpMetricNameAlterCallback
+	httpRequestSection string
 }
 
+// NewStatsdStatsClient builds and returns new StatsdStatsClient instance
 func NewStatsdStatsClient(dsn, prefix string) *StatsdStatsClient {
 	var options []statsd.Option
 	muted := false
@@ -39,19 +42,25 @@ func NewStatsdStatsClient(dsn, prefix string) *StatsdStatsClient {
 		muted = true
 	}
 
-	return &StatsdStatsClient{client: statsdClient, muted: muted}
+	client := &StatsdStatsClient{client: statsdClient, muted: muted}
+	client.ResetHttpRequestSection()
+
+	return client
 }
 
+// BuildTimeTracker builds timer to track metric timings
 func (sc *StatsdStatsClient) BuildTimeTracker() TimeTracker {
 	return NewTimeTracker(sc.client, sc.muted)
 }
 
+// Close statsd connection
 func (sc *StatsdStatsClient) Close() {
 	sc.client.Close()
 }
 
+// TrackRequest tracks HTTP Request stats
 func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) {
-	b := NewBucketHttpRequest(r, success, sc.httpMetricCallback)
+	b := NewBucketHttpRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
 	i := NewIncrementer(sc.client, sc.muted)
 
 	tt.Finish(b.Request())
@@ -62,18 +71,7 @@ func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, succe
 	i.Increment(b.TotalRequestsWithSuffix())
 }
 
-func (sc *StatsdStatsClient) TrackRoundTrip(r *http.Request, tt TimeTracker, success bool) {
-	b := NewBucketHttpRequest(r, success, sc.httpMetricCallback)
-	i := NewIncrementer(sc.client, sc.muted)
-
-	tt.Finish(b.RoundTrip())
-	i.Increment(b.RoundTrip())
-	i.Increment(b.TotalRoundTrip())
-
-	i.Increment(b.RoundTripWithSuffix())
-	i.Increment(b.TotalRoundTripWithSuffix())
-}
-
+// TrackOperation tracks custom operation
 func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)
@@ -87,7 +85,19 @@ func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOper
 	i.Increment(b.MetricTotalWithSuffix())
 }
 
+// SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 func (sc *StatsdStatsClient) SetHttpMetricCallback(callback HttpMetricNameAlterCallback) StatsClient {
 	sc.httpMetricCallback = callback
 	return sc
+}
+
+// SetHttpRequestSection sets metric section for HTTP Request metrics
+func (sc *StatsdStatsClient) SetHttpRequestSection(section string) StatsClient {
+	sc.httpRequestSection = section
+	return sc
+}
+
+// ResetHttpRequestSection resets metric section for HTTP Request metrics to default value that is "request"
+func (sc *StatsdStatsClient) ResetHttpRequestSection() StatsClient {
+	return sc.SetHttpRequestSection(sectionRequest)
 }

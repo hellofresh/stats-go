@@ -6,16 +6,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type MutedTimeTracker struct {
+// LogTimeTracker struct is TimeTracker interface implementation that writes all timings to log
+type LogTimeTracker struct {
 	timerStart time.Time
 }
 
-func (t *MutedTimeTracker) Start() TimeTracker {
+// Start starts timer
+func (t *LogTimeTracker) Start() TimeTracker {
 	t.timerStart = time.Now()
 	return t
 }
 
-func (t *MutedTimeTracker) Finish(bucket string) {
+// Finish writes elapsed time for metric to log
+func (t *LogTimeTracker) Finish(bucket string) {
 	log.WithFields(log.Fields{
 		"bucket":   bucket,
 		"elapsed":  int(time.Now().Sub(t.timerStart) / time.Millisecond),

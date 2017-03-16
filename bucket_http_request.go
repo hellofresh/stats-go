@@ -5,56 +5,39 @@ import (
 	"strings"
 )
 
+// HttpMetricNameAlterCallback is a type for HTTP Request metric alter handler
 type HttpMetricNameAlterCallback func(metricParts MetricOperation, r *http.Request) MetricOperation
 
+// BucketHttpRequest struct
 type BucketHttpRequest struct {
 	*BucketPlain
 	r        *http.Request
 	callback HttpMetricNameAlterCallback
 }
 
-func NewBucketHttpRequest(r *http.Request, success bool, callback HttpMetricNameAlterCallback) *BucketHttpRequest {
+// NewBucketHttpRequest builds and returns new BucketHttpRequest instance
+func NewBucketHttpRequest(section string, r *http.Request, success bool, callback HttpMetricNameAlterCallback) *BucketHttpRequest {
 	operations := getRequestOperations(r, callback)
-	return &BucketHttpRequest{NewBucketPlain("", operations, success), r, callback}
+	return &BucketHttpRequest{NewBucketPlain(section, operations, success), r, callback}
 }
 
+// Request builds simple metric name in the form "request.<method>.<path-level-0>.<path-level-1>"
 func (b *BucketHttpRequest) Request() string {
-	b.BucketPlain.section = sectionRequest
 	return b.Metric()
 }
 
+// RequestsWithSuffix builds metric name with success suffix in the form "request-ok|fail.<method>.<path-level-0>.<path-level-1>"
 func (b *BucketHttpRequest) RequestsWithSuffix() string {
-	b.BucketPlain.section = sectionRequest
 	return b.MetricWithSuffix()
 }
 
+// TotalRequests builds simple total metric name in the form total.request"
 func (b *BucketHttpRequest) TotalRequests() string {
-	b.BucketPlain.section = sectionRequest
 	return b.MetricTotal()
 }
 
+// MetricTotalWithSuffix builds total metric name with success suffix in the form total-ok|fail.request"
 func (b *BucketHttpRequest) TotalRequestsWithSuffix() string {
-	b.BucketPlain.section = sectionRequest
-	return b.MetricTotalWithSuffix()
-}
-
-func (b *BucketHttpRequest) RoundTrip() string {
-	b.BucketPlain.section = sectionRound
-	return b.Metric()
-}
-
-func (b *BucketHttpRequest) RoundTripWithSuffix() string {
-	b.BucketPlain.section = sectionRound
-	return b.MetricWithSuffix()
-}
-
-func (b *BucketHttpRequest) TotalRoundTrip() string {
-	b.BucketPlain.section = sectionRound
-	return b.MetricTotal()
-}
-
-func (b *BucketHttpRequest) TotalRoundTripWithSuffix() string {
-	b.BucketPlain.section = sectionRound
 	return b.MetricTotalWithSuffix()
 }
 

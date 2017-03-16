@@ -18,18 +18,29 @@ const (
 )
 
 var (
-	ErrInvalidFormat      = errors.New("Invalid sections format")
+	// ErrInvalidFormat error indicates that sections string has invalid format
+	ErrInvalidFormat = errors.New("Invalid sections format")
+
+	// ErrUnknownSectionTest error indicates that section has unknown test callback name
 	ErrUnknownSectionTest = errors.New("Unknown section test")
 )
 
+// PathSection type represents single path section string
 type PathSection string
-type SectionTestCallback func(string) bool
+
+// SectionTestCallback type represents section test callback function
+type SectionTestCallback func(PathSection) bool
+
+// SectionTestDefinition type represents section test callback definition
 type SectionTestDefinition struct {
 	Name     string
 	Callback SectionTestCallback
 }
+
+// SectionTestDefinition type represents section test callbacks definitions map
 type SectionsTestsMap map[PathSection]SectionTestDefinition
 
+// String returns pretty formatted string representation of SectionsTestsMap
 func (m SectionsTestsMap) String() string {
 	var sections []string
 	for k, v := range m {
@@ -39,17 +50,20 @@ func (m SectionsTestsMap) String() string {
 	return fmt.Sprintf("[%s]", strings.Join(sections, ", "))
 }
 
-func TestAlwaysTrue(string) bool {
+// TestAlwaysTrue section test callback function that gives true result to any section
+func TestAlwaysTrue(PathSection) bool {
 	return true
 }
 
-func TestIsNumeric(s string) bool {
-	_, err := strconv.Atoi(s)
+// TestAlwaysTrue section test callback function that gives true result if section is numeric
+func TestIsNumeric(s PathSection) bool {
+	_, err := strconv.Atoi(string(s))
 	return err == nil
 }
 
-func TestIsNotEmpty(s string) bool {
-	return s != MetricEmptyPlaceholder
+// TestAlwaysTrue section test callback function that gives true result if section is not empty placeholder ("-")
+func TestIsNotEmpty(s PathSection) bool {
+	return string(s) != MetricEmptyPlaceholder
 }
 
 var (
@@ -61,6 +75,8 @@ var (
 	}
 )
 
+// NewHasIDAtSecondLevelCallback returns HttpMetricNameAlterCallback implementation that checks for IDs
+// on the second level of HTTP Request path
 func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HttpMetricNameAlterCallback {
 	return func(operation MetricOperation, r *http.Request) MetricOperation {
 		firstFragment := "/"
@@ -71,7 +87,7 @@ func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HttpMetr
 			}
 		}
 		if testFunction, ok := hasIDAtSecondLevel[PathSection(firstFragment)]; ok {
-			if testFunction.Callback(operation[2]) {
+			if testFunction.Callback(PathSection(operation[2])) {
 				operation[2] = MetricIDPlaceholder
 			}
 		}
@@ -80,6 +96,7 @@ func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HttpMetr
 	}
 }
 
+// RegisterSectionTest registers new section test callback function with its name
 func RegisterSectionTest(name string, callback SectionTestCallback) {
 	sectionsTestSync.Lock()
 	defer sectionsTestSync.Unlock()
@@ -87,6 +104,7 @@ func RegisterSectionTest(name string, callback SectionTestCallback) {
 	sectionsTestRegistry[name] = callback
 }
 
+// GetSectionTestCallback returns section test callback function by name
 func GetSectionTestCallback(name string) SectionTestCallback {
 	sectionsTestSync.Lock()
 	defer sectionsTestSync.Unlock()
@@ -94,6 +112,12 @@ func GetSectionTestCallback(name string) SectionTestCallback {
 	return sectionsTestRegistry[name]
 }
 
+// ParseSectionsTestsMap parses string into SectionsTestsMap.
+// In most cases string comes as config to the application e.g. from env.
+// Valid string formats are:
+// 1. <section-0>:<test-callback-name-0>:<section-1>:<test-callback-name-1>:<section-2>:<test-callback-name-2>
+// 2. <section-0>:<test-callback-name-0>\n<section-1>:<test-callback-name-1>\n<section-2>:<test-callback-name-2>
+// 3. <section-0>:<test-callback-name-0>:<section-1>:<test-callback-name-1>\n<section-2>:<test-callback-name-2>
 func ParseSectionsTestsMap(s string) (SectionsTestsMap, error) {
 	result := make(SectionsTestsMap)
 	var parts []string

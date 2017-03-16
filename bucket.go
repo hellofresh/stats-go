@@ -6,7 +6,6 @@ const (
 	totalBucket = "total"
 
 	sectionRequest = "request"
-	sectionRound   = "round"
 
 	suffixStatusOk   = "ok"
 	suffixStatusFail = "fail"
@@ -15,6 +14,7 @@ const (
 	MetricIDPlaceholder    = "-id-"
 )
 
+// SanitizeMetricName modifies metric name to work well with statsd
 func SanitizeMetricName(metric string) string {
 	return strings.Replace(
 		// Double underscores

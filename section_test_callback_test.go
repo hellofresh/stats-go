@@ -18,7 +18,7 @@ func Test_sectionsTestRegistry(t *testing.T) {
 
 	assert.Nil(t, GetSectionTestCallback(testKey))
 
-	RegisterSectionTest(testKey, func(string) bool {
+	RegisterSectionTest(testKey, func(PathSection) bool {
 		return false
 	})
 	assert.NotNil(t, GetSectionTestCallback(testKey))

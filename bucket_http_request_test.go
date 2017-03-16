@@ -135,7 +135,7 @@ func TestBucketHttpRequest_Request(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
+		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.Request())
 	}
 }
@@ -153,44 +153,8 @@ func TestBucketHttpRequest_RequestsWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
+		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.RequestsWithSuffix())
-	}
-}
-
-func TestBucketHttpRequest_RoundTrip(t *testing.T) {
-	dataProvider := []struct {
-		Method  string
-		Path    string
-		Success bool
-		Metric  string
-	}{
-		{"GET", "/foo/bar/baz", true, "round.get.foo.bar"},
-		{"GET", "/foo/bar/baz", false, "round.get.foo.bar"},
-	}
-
-	for _, data := range dataProvider {
-		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.RoundTrip())
-	}
-}
-
-func TestBucketHttpRequest_RoundTripWithSuffix(t *testing.T) {
-	dataProvider := []struct {
-		Method  string
-		Path    string
-		Success bool
-		Metric  string
-	}{
-		{"GET", "/foo/bar/baz", true, "round-ok.get.foo.bar"},
-		{"GET", "/foo/bar/baz", false, "round-fail.get.foo.bar"},
-	}
-
-	for _, data := range dataProvider {
-		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.RoundTripWithSuffix())
 	}
 }
 
@@ -207,7 +171,7 @@ func TestBucketHttpRequest_TotalRequests(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
+		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.TotalRequests())
 	}
 }
@@ -225,43 +189,45 @@ func TestBucketHttpRequest_TotalRequestsWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
+		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.TotalRequestsWithSuffix())
 	}
 }
 
-func TestBucketHttpRequest_TotalRoundTrip(t *testing.T) {
+func TestBucketHttpRequest_Request_customSection(t *testing.T) {
+	section := "section111"
 	dataProvider := []struct {
 		Method  string
 		Path    string
 		Success bool
 		Metric  string
 	}{
-		{"GET", "/foo/bar/baz", true, "total.round"},
-		{"GET", "/foo/bar/baz", false, "total.round"},
+		{"GET", "/foo/bar/baz", true, section + ".get.foo.bar"},
+		{"GET", "/foo/bar/baz", false, section + ".get.foo.bar"},
 	}
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.TotalRoundTrip())
+		b := NewBucketHttpRequest(section, r, data.Success, nil)
+		assert.Equal(t, data.Metric, b.Request())
 	}
 }
 
-func TestBucketHttpRequest_TotalRoundTripWithSuffix(t *testing.T) {
+func TestBucketHttpRequest_RequestsWithSuffix_customSection(t *testing.T) {
+	section := "section111"
 	dataProvider := []struct {
 		Method  string
 		Path    string
 		Success bool
 		Metric  string
 	}{
-		{"GET", "/foo/bar/baz", true, "total.round-ok"},
-		{"GET", "/foo/bar/baz", false, "total.round-fail"},
+		{"GET", "/foo/bar/baz", true, section + "-ok.get.foo.bar"},
+		{"GET", "/foo/bar/baz", false, section + "-fail.get.foo.bar"},
 	}
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.TotalRoundTripWithSuffix())
+		b := NewBucketHttpRequest(section, r, data.Success, nil)
+		assert.Equal(t, data.Metric, b.RequestsWithSuffix())
 	}
 }

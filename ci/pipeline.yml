@@ -1,0 +1,178 @@
+---
+resource_types    :
+  - name          : pull-request
+    type          : docker-image
+    source        :
+      repository  : jtarchie/pr
+
+  - name          : slack-notification
+    type          : docker-image
+    source        :
+      repository  : quay.io/hellofresh/slack-notification-resource
+
+  - name          : hf-github-releases
+    type          : docker-image
+    source        :
+      repository  : quay.io/hellofresh/gh-status-dynamic
+
+###############################
+# Resources
+###############################
+resources:
+- name              : stats-go-master
+  type              : git
+  source            :
+    uri             : {{uri}}
+    access_token    : {{oauth_token}}
+    branch          : master
+
+- name              : stats-go-pr
+  type              : pull-request
+  source            :
+    uri             : {{uri}}
+    access_token    : {{oauth_token}}
+    repo            : hellofresh/stats-go
+
+- name              : gh-release-rc
+  type              : hf-github-releases
+  source            :
+    user            : "hellofresh"
+    repository      : "stats-go"
+    access_token    : {{oauth_token}}
+    pre_release     : true
+
+- name              : gh-release-final
+  type              : hf-github-releases
+  source            :
+    user            : "hellofresh"
+    repository      : "stats-go"
+    access_token: {{oauth_token}}
+
+- name              : semantic-version
+  type              : semver
+  source            :
+    driver          : git
+    initial_version : 0.0.0-rc.1
+    uri             : {{uri}}
+    branch          : version
+    file            : version
+
+- name              : slack-alert
+  type              : slack-notification
+  source            :
+    url             : {{slack_url}}
+
+###############################
+# Groups
+###############################
+groups:
+- name: All
+  jobs:
+    - master-test-suite
+    - build-and-release
+    - pullrequest
+    - promote-release
+
+###############################
+# Jobs
+###############################
+jobs:
+
+#
+# Merge to master
+#
+- name: master-test-suite
+  plan:
+  - get: stats-go-master
+    trigger: true
+
+  - task: master unit test
+    file: stats-go-master/ci/tasks/master-unit-test.yml
+    params:
+      PROJECT_SRC: {{project_src}}
+    on_failure:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_message_fail}}
+
+- name: build-and-release
+  public: false
+  serial: true
+  plan:
+  - get: stats-go-master
+    trigger: true
+    passed: ["master-test-suite"]
+
+  - task: build go app
+    file: stats-go-master/ci/tasks/build-staging.yml
+    params:
+      PROJECT_SRC: {{project_src}}
+
+  - put: semantic-version
+    params:
+        pre: 'rc'
+
+  - put: gh-release-rc
+    params:
+      name: semantic-version/version
+      tag : semantic-version/version
+      globs:
+      - artifacts/*.tar.gz
+
+#
+# PR
+#
+- name: pullrequest
+  plan:
+  - get: stats-go-pr
+    trigger: true
+
+  - put: stats-go-pr
+    params:
+        path: stats-go-pr
+        context: unit-tests
+        status: pending
+
+  - aggregate:
+    - task: pullrequest unit test
+      file: stats-go-pr/ci/tasks/prequest-unit-tests.yml
+      params:
+        PROJECT_SRC: {{project_src}}
+      on_failure:
+          put: stats-go-pr
+          params:
+              path: stats-go-pr
+              context: unit-tests
+              status: failure
+      on_success:
+          put: stats-go-pr
+          params:
+              path: stats-go-pr
+              context: unit-tests
+              status: success
+
+#
+# Final release
+#
+- name: promote-release
+  serial: true
+  plan:
+  - get: gh-release-rc
+
+  - put: semantic-version
+    params:
+      bump: final
+
+  - put: gh-release-final
+    params:
+      # commitish: prerelease/commitish
+      globs:
+      - gh-release-rc/*.tar.gz
+      name: semantic-version/version
+      tag: semantic-version/version
+
+  - put: semantic-version
+    params:
+      bump: patch
+      pre: rc

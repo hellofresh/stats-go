@@ -14,6 +14,20 @@ const (
 	MetricIDPlaceholder    = "-id-"
 )
 
+type Bucket interface {
+	// Metric builds simple metric name in the form "<section>.<operation-0>.<operation-1>.<operation-2>"
+	Metric() string
+
+	// MetricWithSuffix builds metric name with success suffix in the form "<section>-ok|fail.<operation-0>.<operation-1>.<operation-2>"
+	MetricWithSuffix() string
+
+	// MetricTotal builds simple total metric name in the form total.<section>"
+	MetricTotal() string
+
+	// MetricTotalWithSuffix builds total metric name with success suffix in the form total-ok|fail.<section>"
+	MetricTotalWithSuffix() string
+}
+
 // SanitizeMetricName modifies metric name to work well with statsd
 func SanitizeMetricName(metric string) string {
 	return strings.Replace(

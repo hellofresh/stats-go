@@ -8,7 +8,7 @@ import (
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation [3]string
 
-// BucketPlain struct
+// BucketPlain struct in an implementation of Bucket interface that produces metric names for given section and operation
 type BucketPlain struct {
 	section   string
 	operation string

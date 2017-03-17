@@ -63,12 +63,8 @@ func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, succe
 	b := NewBucketHttpRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
 	i := NewIncrementer(sc.client, sc.muted)
 
-	tt.Finish(b.Request())
-	i.Increment(b.Request())
-	i.Increment(b.TotalRequests())
-
-	i.Increment(b.RequestsWithSuffix())
-	i.Increment(b.TotalRequestsWithSuffix())
+	tt.Finish(b.Metric())
+	i.IncrementAll(b)
 }
 
 // TrackOperation tracks custom operation
@@ -79,10 +75,18 @@ func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOper
 	if nil != tt {
 		tt.Finish(b.MetricWithSuffix())
 	}
-	i.Increment(b.Metric())
-	i.Increment(b.MetricWithSuffix())
-	i.Increment(b.MetricTotal())
-	i.Increment(b.MetricTotalWithSuffix())
+	i.IncrementAll(b)
+}
+
+// TrackOperation tracks custom operation with n diff
+func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) {
+	b := NewBucketPlain(section, operation, success)
+	i := NewIncrementer(sc.client, sc.muted)
+
+	if nil != tt {
+		tt.Finish(b.MetricWithSuffix())
+	}
+	i.IncrementAllN(b, n)
 }
 
 // SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request

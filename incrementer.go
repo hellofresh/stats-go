@@ -6,8 +6,17 @@ import (
 
 // Incrementer is a metric incrementer interface
 type Incrementer interface {
-	// Increment increments metric for given bucket
-	Increment(bucket string)
+	// Increment increments metric
+	Increment(metric string)
+
+	// IncrementN increments metric by n
+	IncrementN(metric string, n int)
+
+	// Increment increments all metrics for given bucket
+	IncrementAll(b Bucket)
+
+	// Increment increments all metrics for given bucket by n
+	IncrementAllN(b Bucket, n int)
 }
 
 // NewIncrementer builds and returns new Incrementer instance

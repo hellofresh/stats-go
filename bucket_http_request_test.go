@@ -117,7 +117,7 @@ func TestBucketHttpRequest_MetricNameAlterCallback(t *testing.T) {
 	}
 }
 
-func TestBucketHttpRequest_Request(t *testing.T) {
+func TestBucketHttpRequest_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -136,11 +136,11 @@ func TestBucketHttpRequest_Request(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.Request())
+		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
 
-func TestBucketHttpRequest_RequestsWithSuffix(t *testing.T) {
+func TestBucketHttpRequest_MetricWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -154,11 +154,11 @@ func TestBucketHttpRequest_RequestsWithSuffix(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.RequestsWithSuffix())
+		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
 
-func TestBucketHttpRequest_TotalRequests(t *testing.T) {
+func TestBucketHttpRequest_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -172,11 +172,11 @@ func TestBucketHttpRequest_TotalRequests(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.TotalRequests())
+		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
 
-func TestBucketHttpRequest_TotalRequestsWithSuffix(t *testing.T) {
+func TestBucketHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -190,11 +190,11 @@ func TestBucketHttpRequest_TotalRequestsWithSuffix(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.TotalRequestsWithSuffix())
+		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }
 
-func TestBucketHttpRequest_Request_customSection(t *testing.T) {
+func TestBucketHttpRequest_Metric_customSection(t *testing.T) {
 	section := "section111"
 	dataProvider := []struct {
 		Method  string
@@ -209,11 +209,11 @@ func TestBucketHttpRequest_Request_customSection(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(section, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.Request())
+		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
 
-func TestBucketHttpRequest_RequestsWithSuffix_customSection(t *testing.T) {
+func TestBucketHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
 	section := "section111"
 	dataProvider := []struct {
 		Method  string
@@ -228,6 +228,6 @@ func TestBucketHttpRequest_RequestsWithSuffix_customSection(t *testing.T) {
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		b := NewBucketHttpRequest(section, r, data.Success, nil)
-		assert.Equal(t, data.Metric, b.RequestsWithSuffix())
+		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }

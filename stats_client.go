@@ -14,6 +14,8 @@ type StatsClient interface {
 
 	// TrackOperation tracks custom operation
 	TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool)
+	// TrackOperation tracks custom operation with n diff
+	TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool)
 
 	// SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 	SetHttpMetricCallback(callback HttpMetricNameAlterCallback) StatsClient

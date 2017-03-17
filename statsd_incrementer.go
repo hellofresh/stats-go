@@ -19,7 +19,7 @@ func (i *StatsdIncrementer) IncrementN(metric string, n int) {
 	i.c.Count(metric, n)
 }
 
-// Increment increments all metrics for given bucket in statsd
+// IncrementAll increments all metrics for given bucket in statsd
 func (i *StatsdIncrementer) IncrementAll(b Bucket) {
 	i.Increment(b.Metric())
 	i.Increment(b.MetricWithSuffix())
@@ -27,7 +27,7 @@ func (i *StatsdIncrementer) IncrementAll(b Bucket) {
 	i.Increment(b.MetricTotalWithSuffix())
 }
 
-// Increment increments all metrics for given bucket in statsd
+// IncrementAllN increments all metrics for given bucket in statsd
 func (i *StatsdIncrementer) IncrementAllN(b Bucket, n int) {
 	i.IncrementN(b.Metric(), n)
 	i.IncrementN(b.MetricWithSuffix(), n)

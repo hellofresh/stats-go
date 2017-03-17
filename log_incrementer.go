@@ -12,12 +12,12 @@ func (i *LogIncrementer) Increment(metric string) {
 	log.WithField("metric", metric).Debug("Muted stats counter increment")
 }
 
-// Increment writes given metric to log
+// IncrementN writes given metric to log
 func (i *LogIncrementer) IncrementN(metric string, n int) {
 	log.WithField("metric", metric).WithField("n", n).Debug("Muted stats counter increment by n")
 }
 
-// Increment writes all metrics for given bucket to log
+// IncrementAll writes all metrics for given bucket to log
 func (i *LogIncrementer) IncrementAll(b Bucket) {
 	i.Increment(b.Metric())
 	i.Increment(b.MetricWithSuffix())
@@ -25,7 +25,7 @@ func (i *LogIncrementer) IncrementAll(b Bucket) {
 	i.Increment(b.MetricTotalWithSuffix())
 }
 
-// Increment writes all metrics for given bucket to log
+// IncrementN writes all metrics for given bucket to log
 func (i *LogIncrementer) IncrementAllN(b Bucket, n int) {
 	i.IncrementN(b.Metric(), n)
 	i.IncrementN(b.MetricWithSuffix(), n)

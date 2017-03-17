@@ -10,10 +10,14 @@ const (
 	suffixStatusOk   = "ok"
 	suffixStatusFail = "fail"
 
+	// MetricEmptyPlaceholder is a string placeholder for empty (unset) sections of operation
 	MetricEmptyPlaceholder = "-"
-	MetricIDPlaceholder    = "-id-"
+
+	// MetricIDPlaceholder is a string placeholder for ID section of operation if any
+	MetricIDPlaceholder = "-id-"
 )
 
+// Bucket is an interface for building metric names for operations
 type Bucket interface {
 	// Metric builds simple metric name in the form "<section>.<operation-0>.<operation-1>.<operation-2>"
 	Metric() string

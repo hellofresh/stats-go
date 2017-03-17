@@ -12,8 +12,13 @@ import (
 const (
 	sectionsDelimiter = ":"
 
-	SectionTestTrue       = "true"
-	SectionTestIsNumeric  = "numeric"
+	// SectionTestTrue is a name for "stats.TestAlwaysTrue" test callback function
+	SectionTestTrue = "true"
+
+	// SectionTestIsNumeric is a name for "stats.TestIsNumeric" test callback function
+	SectionTestIsNumeric = "numeric"
+
+	// SectionTestIsNotEmpty is a name for "stats.TestIsNotEmpty" test callback function
 	SectionTestIsNotEmpty = "not_empty"
 )
 

@@ -81,7 +81,7 @@ func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOper
 	i.IncrementAll(b)
 }
 
-// TrackOperation tracks custom operation with n diff
+// TrackOperationN tracks custom operation with n diff
 func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)

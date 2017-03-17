@@ -25,7 +25,7 @@ func (i *LogIncrementer) IncrementAll(b Bucket) {
 	i.Increment(b.MetricTotalWithSuffix())
 }
 
-// IncrementN writes all metrics for given bucket to log
+// IncrementAllN writes all metrics for given bucket to log
 func (i *LogIncrementer) IncrementAllN(b Bucket, n int) {
 	i.IncrementN(b.Metric(), n)
 	i.IncrementN(b.MetricWithSuffix(), n)

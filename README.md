@@ -12,13 +12,13 @@
 
 > Generic Stats library written in Go
 
-This is generic stats library that we use in our projects to collects services stats and then create monitoring
+This is generic stats library that we use in our projects to collect services' stats and then create monitoring
 dashboards to track activity and problems.
 
 ## Key Features
 
 * Two stats backends - `statsd` for production and `log` for development environment
-* Fixed metric sections count for all metrics that allows easy monitoring/alerting setup in `graphana`
+* Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
 * Easy to build HTTP requests metrics - timing and count
 * Generalise or modify HTTP Requests metric - e.g. skip ID part
 
@@ -119,17 +119,17 @@ func main() {
 
 #### Generalise resources by type and stripping resource ID
 
-In some cases you do not need to collects metrics for all unique requests, but a single metric for requests of the similar type,
+In some cases you do not need to collect metrics for all unique requests, but a single metric for requests of the similar type,
 e.g. access time to concrete users pages does not matter a lot, but average access time is important.
-`hellofresh/stats-go` allows HTTP Request metric modification and supports IDs filtering out of the box, so
-you can get generic metric `get.users.-id-` instead of thousands metrics like `get.users.1`, `get.users.13`,
+`hellofresh/stats-go` allows HTTP Request metric modification and supports ID filtering out of the box, so
+you can get generic metric `get.users.-id-` instead thousands of metrics like `get.users.1`, `get.users.13`,
 `get.users.42` etc. that may make your `graphite` suffer from overloading.
 
-To use metric generalisation by second level path ID you can pass `stats.HttpMetricNameAlterCallback` instance to
+To use metric generalisation by second level path ID, you can pass `stats.HttpMetricNameAlterCallback` instance to
 `stats.StatsClient.SetHttpMetricCallback()`. Also there is a shortcut function `stats.NewHasIDAtSecondLevelCallback()`
-that generates callback handler for `stats.SectionsTestsMap`, and shortcut function `stats.ParseSectionsTestsMap`,
-that generates sections test map from string, so you can get this values from config.
-It accepts list of sections with test callback in the following format: `<section>:<test-callback-name>`.
+that generates a callback handler for `stats.SectionsTestsMap`, and shortcut function `stats.ParseSectionsTestsMap`,
+that generates sections test map from string, so you can get these values from config.
+It accepts a list of sections with test callback in the following format: `<section>:<test-callback-name>`.
 You can use either double colon or new line character as section-callback pairs separator, so all of the following
 forms are correct:
 
@@ -146,7 +146,7 @@ Currently the following test callbacks are implemented:
 * `not_empty` - only not empty second path level is interpreted as ID,
   e.g. `/users/13` -> `users.-id-`, `/users` -> `users.-`
 
-You can register your own test callback functions using `stats.RegisterSectionTest()` function
+You can register your own test callback functions using the `stats.RegisterSectionTest()` function
 before parsing sections map from string.
 
 ```go

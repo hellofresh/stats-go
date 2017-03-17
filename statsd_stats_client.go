@@ -2,10 +2,13 @@ package stats
 
 import (
 	"net/http"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
+
+var setterSync sync.Mutex
 
 // StatsdStatsClient is StatsClient implementation for statsd
 type StatsdStatsClient struct {
@@ -91,12 +94,18 @@ func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOpe
 
 // SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 func (sc *StatsdStatsClient) SetHttpMetricCallback(callback HttpMetricNameAlterCallback) StatsClient {
+	setterSync.Lock()
+	defer setterSync.Unlock()
+
 	sc.httpMetricCallback = callback
 	return sc
 }
 
 // SetHttpRequestSection sets metric section for HTTP Request metrics
 func (sc *StatsdStatsClient) SetHttpRequestSection(section string) StatsClient {
+	setterSync.Lock()
+	defer setterSync.Unlock()
+
 	sc.httpRequestSection = section
 	return sc
 }

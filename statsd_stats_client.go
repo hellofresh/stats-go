@@ -57,21 +57,24 @@ func (sc *StatsdStatsClient) BuildTimeTracker() TimeTracker {
 }
 
 // Close statsd connection
-func (sc *StatsdStatsClient) Close() {
+func (sc *StatsdStatsClient) Close() error {
 	sc.client.Close()
+	return nil
 }
 
 // TrackRequest tracks HTTP Request stats
-func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) {
+func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) StatsClient {
 	b := NewBucketHttpRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
 	i := NewIncrementer(sc.client, sc.muted)
 
 	tt.Finish(b.Metric())
 	i.IncrementAll(b)
+
+	return sc
 }
 
 // TrackOperation tracks custom operation
-func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) {
+func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) StatsClient {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)
 
@@ -79,10 +82,12 @@ func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOper
 		tt.Finish(b.MetricWithSuffix())
 	}
 	i.IncrementAll(b)
+
+	return sc
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) {
+func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) StatsClient {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)
 
@@ -90,6 +95,8 @@ func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOpe
 		tt.Finish(b.MetricWithSuffix())
 	}
 	i.IncrementAllN(b, n)
+
+	return sc
 }
 
 // SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request

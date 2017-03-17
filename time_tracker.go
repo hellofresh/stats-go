@@ -16,7 +16,6 @@ type TimeTracker interface {
 func NewTimeTracker(c *statsd.Client, muted bool) TimeTracker {
 	if muted {
 		return &LogTimeTracker{}
-	} else {
-		return &StatsdTimeTracker{c: c}
 	}
+	return &StatsdTimeTracker{c: c}
 }

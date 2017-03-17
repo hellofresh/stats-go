@@ -12,7 +12,7 @@
 
 > Generic Stats library written in Go
 
-This is generic stats library that we use in our projects to collect services' stats and then create monitoring
+This is generic stats library that we at HelloFresh use in our projects to collect services' stats and then create monitoring
 dashboards to track activity and problems.
 
 ## Key Features

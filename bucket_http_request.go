@@ -10,11 +10,10 @@ type HttpMetricNameAlterCallback func(metricParts MetricOperation, r *http.Reque
 
 // BucketHttpRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
 // Metrics has the following formats for methods:
-//
-// * "Metric()" - "<section>.<method>.<path-level-0>.<path-level-1>"
-// * "MetricWithSuffix()" - "<section>-ok|fail.<method>.<path-level-0>.<path-level-1>"
-// * "TotalRequests()" builds simple total metric name in the form "total.<section>"
-// * "MetricTotalWithSuffix()" - builds total metric name with success suffix in the form "total-ok|fail.<section>"
+//  Metric() -> <section>.<method>.<path-level-0>.<path-level-1>
+//  MetricWithSuffix() -> <section>-ok|fail.<method>.<path-level-0>.<path-level-1>
+//  TotalRequests() -> total.<section>
+//  MetricTotalWithSuffix() -> total-ok|fail.<section>
 //
 // Normally "<section>" is set to "request", but you can use any string value here.
 type BucketHttpRequest struct {

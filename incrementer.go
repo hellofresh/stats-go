@@ -23,7 +23,6 @@ type Incrementer interface {
 func NewIncrementer(c *statsd.Client, muted bool) Incrementer {
 	if muted {
 		return &LogIncrementer{}
-	} else {
-		return &StatsdIncrementer{c}
 	}
+	return &StatsdIncrementer{c}
 }

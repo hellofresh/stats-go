@@ -44,11 +44,15 @@ import (
 func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
         statsdClient := stats.NewStatsdStatsClient("statsd-host:8125", "my.app.prefix")
+        defer statsdClient.Close()
+
         // explicitly use debug log backend for stats
         mutedClient := stats.NewStatsdStatsClient("", "my.app.prefix")
+        defer mutedClient.Close()
 
         // get settings from env to determine backend and prefix
         statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        defer statsClient.Close()
 }
 ```
 
@@ -104,6 +108,7 @@ import (
 
 func main() {
         statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        defer statsClient.Close()
 
         router := gin.Default()
         router.Use(middleware.NewStatsRequest(statsClient))
@@ -169,6 +174,7 @@ func main() {
         }
         statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX")).
                 SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+        defer statsClient.Close()
 
         router := gin.Default()
         router.Use(middleware.NewStatsRequest(statsClient))

@@ -42,7 +42,7 @@ type SectionTestDefinition struct {
 	Callback SectionTestCallback
 }
 
-// SectionTestDefinition type represents section test callbacks definitions map
+// SectionsTestsMap type represents section test callbacks definitions map
 type SectionsTestsMap map[PathSection]SectionTestDefinition
 
 // String returns pretty formatted string representation of SectionsTestsMap
@@ -60,13 +60,13 @@ func TestAlwaysTrue(PathSection) bool {
 	return true
 }
 
-// TestAlwaysTrue section test callback function that gives true result if section is numeric
+// TestIsNumeric section test callback function that gives true result if section is numeric
 func TestIsNumeric(s PathSection) bool {
 	_, err := strconv.Atoi(string(s))
 	return err == nil
 }
 
-// TestAlwaysTrue section test callback function that gives true result if section is not empty placeholder ("-")
+// TestIsNotEmpty section test callback function that gives true result if section is not empty placeholder ("-")
 func TestIsNotEmpty(s PathSection) bool {
 	return string(s) != MetricEmptyPlaceholder
 }
@@ -144,11 +144,11 @@ func ParseSectionsTestsMap(s string) (SectionsTestsMap, error) {
 		pathSection := PathSection(parts[i])
 		sectionTestName := parts[i+1]
 
-		if sectionTestCallback := GetSectionTestCallback(sectionTestName); sectionTestCallback == nil {
+		sectionTestCallback := GetSectionTestCallback(sectionTestName)
+		if sectionTestCallback == nil {
 			return nil, ErrUnknownSectionTest
-		} else {
-			result[pathSection] = SectionTestDefinition{sectionTestName, sectionTestCallback}
 		}
+		result[pathSection] = SectionTestDefinition{sectionTestName, sectionTestCallback}
 	}
 
 	return result, nil

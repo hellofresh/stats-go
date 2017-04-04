@@ -8,10 +8,9 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-var setterSync sync.Mutex
-
 // StatsdClient is Client implementation for statsd
 type StatsdClient struct {
+	sync.Mutex
 	client             *statsd.Client
 	muted              bool
 	httpMetricCallback HTTPMetricNameAlterCallback
@@ -101,8 +100,8 @@ func (sc *StatsdClient) TrackOperationN(section string, operation MetricOperatio
 
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 func (sc *StatsdClient) SetHTTPMetricCallback(callback HTTPMetricNameAlterCallback) Client {
-	setterSync.Lock()
-	defer setterSync.Unlock()
+	sc.Lock()
+	defer sc.Unlock()
 
 	sc.httpMetricCallback = callback
 	return sc
@@ -110,8 +109,8 @@ func (sc *StatsdClient) SetHTTPMetricCallback(callback HTTPMetricNameAlterCallba
 
 // SetHTTPRequestSection sets metric section for HTTP Request metrics
 func (sc *StatsdClient) SetHTTPRequestSection(section string) Client {
-	setterSync.Lock()
-	defer setterSync.Unlock()
+	sc.Lock()
+	defer sc.Unlock()
 
 	sc.httpRequestSection = section
 	return sc

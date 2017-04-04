@@ -82,7 +82,7 @@ var (
 
 // NewHasIDAtSecondLevelCallback returns HttpMetricNameAlterCallback implementation that checks for IDs
 // on the second level of HTTP Request path
-func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HttpMetricNameAlterCallback {
+func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HTTPMetricNameAlterCallback {
 	return func(operation MetricOperation, r *http.Request) MetricOperation {
 		firstFragment := "/"
 		for _, fragment := range strings.Split(r.URL.Path, "/") {

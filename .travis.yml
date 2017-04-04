@@ -17,6 +17,6 @@ install:
   - make deps
 
 script:
-  - make unit-tests
+  - make test
   - $GOPATH/bin/overalls -project=github.com/hellofresh/stats-go -covermode=count
   - $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN

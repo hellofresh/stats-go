@@ -44,15 +44,15 @@ import (
 
 func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        statsdClient := stats.NewStatsdStatsClient("statsd-host:8125", "my.app.prefix")
+        statsdClient := stats.NewStatsdClient("statsd-host:8125", "my.app.prefix")
         defer statsdClient.Close()
 
         // explicitly use debug log backend for stats
-        mutedClient := stats.NewStatsdStatsClient("", "my.app.prefix")
+        mutedClient := stats.NewStatsdClient("", "my.app.prefix")
         defer mutedClient.Close()
 
         // get settings from env to determine backend and prefix
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient := stats.NewStatsdClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()
 }
 ```
@@ -80,7 +80,7 @@ import (
 )
 
 // NewStatsRequest returns a middleware handler function.
-func NewStatsRequest(sc stats.StatsClient) gin.HandlerFunc {
+func NewStatsRequest(sc stats.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.WithField("path", c.Request.URL.Path).Debug("Starting Stats middleware")
 
@@ -108,7 +108,7 @@ import (
 )
 
 func main() {
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient := stats.NewStatsdClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()
 
         router := gin.Default()
@@ -173,7 +173,7 @@ func main() {
         if err != nil {
                 sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
         }
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX")).
+        statsClient := stats.NewStatsdClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX")).
                 SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
         defer statsClient.Close()
 

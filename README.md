@@ -7,6 +7,7 @@
 # hellofresh/stats-go
 
 [![Build Status](https://travis-ci.org/hellofresh/stats-go.svg?branch=master)](https://travis-ci.org/hellofresh/stats-go)
+[![Coverage Status](https://coveralls.io/repos/github/hellofresh/stats-go/badge.svg?branch=master)](https://coveralls.io/github/hellofresh/stats-go?branch=master)
 [![GoDoc](https://godoc.org/github.com/hellofresh/stats-go?status.svg)](https://godoc.org/github.com/hellofresh/stats-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/stats-go)](https://goreportcard.com/report/github.com/hellofresh/stats-go)
 

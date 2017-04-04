@@ -34,6 +34,10 @@ type Bucket interface {
 
 // SanitizeMetricName modifies metric name to work well with statsd
 func SanitizeMetricName(metric string) string {
+	if metric == "" {
+		return MetricEmptyPlaceholder
+	}
+
 	return strings.Replace(
 		// Double underscores
 		strings.Replace(metric, "_", "__", -1),

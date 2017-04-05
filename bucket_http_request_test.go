@@ -135,7 +135,7 @@ func TestBucketHttpRequest_Metric(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
+		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
@@ -153,7 +153,7 @@ func TestBucketHttpRequest_MetricWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
+		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
@@ -171,7 +171,7 @@ func TestBucketHttpRequest_MetricTotal(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
+		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
@@ -189,7 +189,7 @@ func TestBucketHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(sectionRequest, r, data.Success, nil)
+		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }
@@ -208,7 +208,7 @@ func TestBucketHttpRequest_Metric_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(section, r, data.Success, nil)
+		b := NewBucketHTTPRequest(section, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
@@ -227,7 +227,7 @@ func TestBucketHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHttpRequest(section, r, data.Success, nil)
+		b := NewBucketHTTPRequest(section, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }

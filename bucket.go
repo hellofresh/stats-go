@@ -1,6 +1,10 @@
 package stats
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/fiam/gounidecode/unidecode"
+)
 
 const (
 	totalBucket = "total"
@@ -9,6 +13,8 @@ const (
 
 	suffixStatusOk   = "ok"
 	suffixStatusFail = "fail"
+
+	prefixUnicode = "-u-"
 
 	// MetricEmptyPlaceholder is a string placeholder for empty (unset) sections of operation
 	MetricEmptyPlaceholder = "-"
@@ -34,6 +40,16 @@ type Bucket interface {
 
 // SanitizeMetricName modifies metric name to work well with statsd
 func SanitizeMetricName(metric string) string {
+	if metric == "" {
+		return MetricEmptyPlaceholder
+	}
+
+	// convert unicode symbols to ASCII
+	asciiMetric := unidecode.Unidecode(metric)
+	if asciiMetric != metric {
+		metric = prefixUnicode + asciiMetric
+	}
+
 	return strings.Replace(
 		// Double underscores
 		strings.Replace(metric, "_", "__", -1),

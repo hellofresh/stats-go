@@ -7,6 +7,7 @@
 # hellofresh/stats-go
 
 [![Build Status](https://travis-ci.org/hellofresh/stats-go.svg?branch=master)](https://travis-ci.org/hellofresh/stats-go)
+[![Coverage Status](https://coveralls.io/repos/github/hellofresh/stats-go/badge.svg?branch=master)](https://coveralls.io/github/hellofresh/stats-go?branch=master)
 [![GoDoc](https://godoc.org/github.com/hellofresh/stats-go?status.svg)](https://godoc.org/github.com/hellofresh/stats-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/stats-go)](https://goreportcard.com/report/github.com/hellofresh/stats-go)
 
@@ -17,7 +18,10 @@ dashboards to track activity and problems.
 
 ## Key Features
 
-* Two stats backends - `statsd` for production and `log` for development environment
+* Several stats backends - `statsd` for production and `log` for development environment
+  * `log` for development environment
+  * `statsd` for production (with fallback to `log` if statsd server is not available)
+  * `memory` for testing purpose, to track stats operations in unit tests
 * Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
 * Easy to build HTTP requests metrics - timing and count
 * Generalise or modify HTTP Requests metric - e.g. skip ID part
@@ -43,15 +47,29 @@ import (
 
 func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        statsdClient := stats.NewStatsdStatsClient("statsd-host:8125", "my.app.prefix")
+        statsdClient, _ := stats.NewClient("statsd://statsd-host:8125", "my.app.prefix")
         defer statsdClient.Close()
+        
+        // debug log backend for stats
+        logClient, _ := stats.NewClient("log://", "")
+        defer logClient.Close()
+        
+        // memory backend to track operations in unit tests
+        memoryClient, _ := stats.NewClient("memory://", "")
+        defer memoryClient.Close()
 
-        // explicitly use debug log backend for stats
-        mutedClient := stats.NewStatsdStatsClient("", "my.app.prefix")
-        defer mutedClient.Close()
+        // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
+        // format for backward compatibility with previous version
+        legacyStatsdClient, _ := stats.NewClient("statsd-host:8125", "my.app.prefix")
+        defer legacyStatsdClient.Close()
+
+        // debug log backend for stats
+        // format for backward compatibility with previous version
+        legacyLogClient, _ := stats.NewClient("", "")
+        defer legacyLogClient.Close()
 
         // get settings from env to determine backend and prefix
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()
 }
 ```
@@ -79,7 +97,7 @@ import (
 )
 
 // NewStatsRequest returns a middleware handler function.
-func NewStatsRequest(sc stats.StatsClient) gin.HandlerFunc {
+func NewStatsRequest(sc stats.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.WithField("path", c.Request.URL.Path).Debug("Starting Stats middleware")
 
@@ -107,7 +125,7 @@ import (
 )
 
 func main() {
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient := stats.NewStatsdClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()
 
         router := gin.Default()
@@ -119,6 +137,49 @@ func main() {
         })
 
         router.Run(":8080")
+}
+```
+
+#### Usage in unit tests
+
+```go
+package foo
+
+import "github.com/hellofresh/stats-go"
+
+const sectionStatsFoo = "foo"
+
+func DoSomeJob(statsClient stats.Client) error {
+        tt := statsClient.BuildTimeTracker().Start()
+        operation := stats.MetricOperation{"do", "some", "job"}
+
+        result, err := doSomeRealJobHere()
+        statsClient.TrackOperation(sectionStatsFoo, operation, tt, result)
+
+        return err
+}
+```
+
+```go
+package foo
+
+import (
+        "testing"
+
+        "github.com/hellofresh/stats-go"
+        "github.com/stretchr/testify/assert"
+)
+
+func TestDoSomeJob(t *testing.T) {
+        statsClient, _ := stats.NewClient("memory://", "") 
+        
+        err := DoSomeJob(statsClient)
+        assert.Nil(t, err)
+        
+        statsMemory, _ := statsClient.(stats.MemoryClient)
+        assert.Equal(t, 1, len(statsMemory.TimeMetrics))
+        assert.Equal(t, "foo-ok.do.some.job", statsMemory.TimeMetrics[0].Bucket)
+        assert.Equal(t, 1, statsMemory.CountMetrics["foo-ok.do.some.job"])
 }
 ```
 
@@ -172,8 +233,8 @@ func main() {
         if err != nil {
                 sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
         }
-        statsClient := stats.NewStatsdStatsClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX")).
-                SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
         defer statsClient.Close()
 
         router := gin.Default()

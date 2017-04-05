@@ -8,18 +8,17 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-var setterSync sync.Mutex
-
-// StatsdStatsClient is StatsClient implementation for statsd
-type StatsdStatsClient struct {
+// StatsdClient is Client implementation for statsd
+type StatsdClient struct {
+	sync.Mutex
 	client             *statsd.Client
 	muted              bool
-	httpMetricCallback HttpMetricNameAlterCallback
+	httpMetricCallback HTTPMetricNameAlterCallback
 	httpRequestSection string
 }
 
-// NewStatsdStatsClient builds and returns new StatsdStatsClient instance
-func NewStatsdStatsClient(dsn, prefix string) *StatsdStatsClient {
+// NewStatsdClient builds and returns new StatsdClient instance
+func NewStatsdClient(dsn, prefix string) *StatsdClient {
 	var options []statsd.Option
 	muted := false
 
@@ -45,26 +44,26 @@ func NewStatsdStatsClient(dsn, prefix string) *StatsdStatsClient {
 		muted = true
 	}
 
-	client := &StatsdStatsClient{client: statsdClient, muted: muted}
-	client.ResetHttpRequestSection()
+	client := &StatsdClient{client: statsdClient, muted: muted}
+	client.ResetHTTPRequestSection()
 
 	return client
 }
 
 // BuildTimeTracker builds timer to track metric timings
-func (sc *StatsdStatsClient) BuildTimeTracker() TimeTracker {
+func (sc *StatsdClient) BuildTimeTracker() TimeTracker {
 	return NewTimeTracker(sc.client, sc.muted)
 }
 
 // Close statsd connection
-func (sc *StatsdStatsClient) Close() error {
+func (sc *StatsdClient) Close() error {
 	sc.client.Close()
 	return nil
 }
 
 // TrackRequest tracks HTTP Request stats
-func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) StatsClient {
-	b := NewBucketHttpRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
+func (sc *StatsdClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) Client {
+	b := NewBucketHTTPRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
 	i := NewIncrementer(sc.client, sc.muted)
 
 	tt.Finish(b.Metric())
@@ -74,7 +73,7 @@ func (sc *StatsdStatsClient) TrackRequest(r *http.Request, tt TimeTracker, succe
 }
 
 // TrackOperation tracks custom operation
-func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) StatsClient {
+func (sc *StatsdClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)
 
@@ -87,7 +86,7 @@ func (sc *StatsdStatsClient) TrackOperation(section string, operation MetricOper
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) StatsClient {
+func (sc *StatsdClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client {
 	b := NewBucketPlain(section, operation, success)
 	i := NewIncrementer(sc.client, sc.muted)
 
@@ -99,25 +98,25 @@ func (sc *StatsdStatsClient) TrackOperationN(section string, operation MetricOpe
 	return sc
 }
 
-// SetHttpMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
-func (sc *StatsdStatsClient) SetHttpMetricCallback(callback HttpMetricNameAlterCallback) StatsClient {
-	setterSync.Lock()
-	defer setterSync.Unlock()
+// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
+func (sc *StatsdClient) SetHTTPMetricCallback(callback HTTPMetricNameAlterCallback) Client {
+	sc.Lock()
+	defer sc.Unlock()
 
 	sc.httpMetricCallback = callback
 	return sc
 }
 
-// SetHttpRequestSection sets metric section for HTTP Request metrics
-func (sc *StatsdStatsClient) SetHttpRequestSection(section string) StatsClient {
-	setterSync.Lock()
-	defer setterSync.Unlock()
+// SetHTTPRequestSection sets metric section for HTTP Request metrics
+func (sc *StatsdClient) SetHTTPRequestSection(section string) Client {
+	sc.Lock()
+	defer sc.Unlock()
 
 	sc.httpRequestSection = section
 	return sc
 }
 
-// ResetHttpRequestSection resets metric section for HTTP Request metrics to default value that is "request"
-func (sc *StatsdStatsClient) ResetHttpRequestSection() StatsClient {
-	return sc.SetHttpRequestSection(sectionRequest)
+// ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
+func (sc *StatsdClient) ResetHTTPRequestSection() Client {
+	return sc.SetHTTPRequestSection(sectionRequest)
 }

@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-// HttpMetricNameAlterCallback is a type for HTTP Request metric alter handler
-type HttpMetricNameAlterCallback func(metricParts MetricOperation, r *http.Request) MetricOperation
+// HTTPMetricNameAlterCallback is a type for HTTP Request metric alter handler
+type HTTPMetricNameAlterCallback func(metricParts MetricOperation, r *http.Request) MetricOperation
 
-// BucketHttpRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
+// BucketHTTPRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
 // Metrics has the following formats for methods:
 //  Metric() -> <section>.<method>.<path-level-0>.<path-level-1>
 //  MetricWithSuffix() -> <section>-ok|fail.<method>.<path-level-0>.<path-level-1>
@@ -16,19 +16,19 @@ type HttpMetricNameAlterCallback func(metricParts MetricOperation, r *http.Reque
 //  MetricTotalWithSuffix() -> total-ok|fail.<section>
 //
 // Normally "<section>" is set to "request", but you can use any string value here.
-type BucketHttpRequest struct {
+type BucketHTTPRequest struct {
 	*BucketPlain
 	r        *http.Request
-	callback HttpMetricNameAlterCallback
+	callback HTTPMetricNameAlterCallback
 }
 
-// NewBucketHttpRequest builds and returns new BucketHttpRequest instance
-func NewBucketHttpRequest(section string, r *http.Request, success bool, callback HttpMetricNameAlterCallback) *BucketHttpRequest {
+// NewBucketHTTPRequest builds and returns new BucketHTTPRequest instance
+func NewBucketHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback) *BucketHTTPRequest {
 	operations := getRequestOperations(r, callback)
-	return &BucketHttpRequest{NewBucketPlain(section, operations, success), r, callback}
+	return &BucketHTTPRequest{NewBucketPlain(section, operations, success), r, callback}
 }
 
-func getRequestOperations(r *http.Request, callback HttpMetricNameAlterCallback) MetricOperation {
+func getRequestOperations(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {
 	metricParts := MetricOperation{strings.ToLower(r.Method), MetricEmptyPlaceholder, MetricEmptyPlaceholder}
 	if r.URL.Path != "/" {
 		partsFilled := 1

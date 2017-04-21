@@ -7,6 +7,17 @@ import (
 	"net/url"
 )
 
+const (
+	// StatsD is a dsn scheme value for statsd client
+	StatsD = "statsd"
+	// Log is a dsn scheme value for log client
+	Log = "log"
+	// Memory is a dsn scheme value for memory client
+	Memory = "memory"
+	// Noop is a dsn scheme value for noop client
+	Noop = "noop"
+)
+
 // ErrUnknownClient is an error returned when trying to create stats client of unknown type
 var ErrUnknownClient = errors.New("Unknown stats client type")
 
@@ -22,7 +33,7 @@ type Client interface {
 
 	// TrackOperation tracks custom operation
 	TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client
-	// TrackOperation tracks custom operation with n diff
+	// TrackOperationN tracks custom operation with n diff
 	TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client
 
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
@@ -53,12 +64,14 @@ func NewClient(dsn, prefix string) (Client, error) {
 	}
 
 	switch dsnURL.Scheme {
-	case "statsd":
+	case StatsD:
 		return NewStatsdClient(dsnURL.Host, prefix), nil
-	case "log":
+	case Log:
 		return NewLogClient(), nil
-	case "memory":
+	case Memory:
 		return NewMemoryClient(), nil
+	case Noop:
+		return NewNoopClient(), nil
 	}
 
 	return nil, ErrUnknownClient

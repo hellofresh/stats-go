@@ -18,10 +18,11 @@ dashboards to track activity and problems.
 
 ## Key Features
 
-* Several stats backends - `statsd` for production and `log` for development environment
+* Several stats backends:
   * `log` for development environment
   * `statsd` for production (with fallback to `log` if statsd server is not available)
   * `memory` for testing purpose, to track stats operations in unit tests
+  * `noop` for environments that do not require any stats gathering
 * Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
 * Easy to build HTTP requests metrics - timing and count
 * Generalise or modify HTTP Requests metric - e.g. skip ID part
@@ -49,14 +50,18 @@ func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
         statsdClient, _ := stats.NewClient("statsd://statsd-host:8125", "my.app.prefix")
         defer statsdClient.Close()
-        
+
         // debug log backend for stats
         logClient, _ := stats.NewClient("log://", "")
         defer logClient.Close()
-        
+
         // memory backend to track operations in unit tests
         memoryClient, _ := stats.NewClient("memory://", "")
         defer memoryClient.Close()
+
+        // noop backend to ignore all stats
+        noopClient, _ := stats.NewClient("noop://", "")
+        defer noopClient.Close()
 
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
         // format for backward compatibility with previous version
@@ -192,7 +197,7 @@ you can get generic metric `get.users.-id-` instead thousands of metrics like `g
 `get.users.42` etc. that may make your `graphite` suffer from overloading.
 
 To use metric generalisation by second level path ID, you can pass `stats.HttpMetricNameAlterCallback` instance to
-`stats.StatsClient.SetHttpMetricCallback()`. Also there is a shortcut function `stats.NewHasIDAtSecondLevelCallback()`
+`stats.Client.SetHttpMetricCallback()`. Also there is a shortcut function `stats.NewHasIDAtSecondLevelCallback()`
 that generates a callback handler for `stats.SectionsTestsMap`, and shortcut function `stats.ParseSectionsTestsMap`,
 that generates sections test map from string, so you can get these values from config.
 It accepts a list of sections with test callback in the following format: `<section>:<test-callback-name>`.

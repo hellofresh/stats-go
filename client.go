@@ -22,7 +22,7 @@ type Client interface {
 
 	// TrackOperation tracks custom operation
 	TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client
-	// TrackOperation tracks custom operation with n diff
+	// TrackOperationN tracks custom operation with n diff
 	TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client
 
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
@@ -59,6 +59,8 @@ func NewClient(dsn, prefix string) (Client, error) {
 		return NewLogClient(), nil
 	case "memory":
 		return NewMemoryClient(), nil
+	case "noop":
+		return NewNoopClient(), nil
 	}
 
 	return nil, ErrUnknownClient

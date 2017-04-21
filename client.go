@@ -7,6 +7,17 @@ import (
 	"net/url"
 )
 
+const (
+	// StatsD is a dsn scheme value for statsd client
+	StatsD = "statsd"
+	// Log is a dsn scheme value for log client
+	Log = "log"
+	// Memory is a dsn scheme value for memory client
+	Memory = "memory"
+	// Noop is a dsn scheme value for noop client
+	Noop = "noop"
+)
+
 // ErrUnknownClient is an error returned when trying to create stats client of unknown type
 var ErrUnknownClient = errors.New("Unknown stats client type")
 
@@ -53,13 +64,13 @@ func NewClient(dsn, prefix string) (Client, error) {
 	}
 
 	switch dsnURL.Scheme {
-	case "statsd":
+	case StatsD:
 		return NewStatsdClient(dsnURL.Host, prefix), nil
-	case "log":
+	case Log:
 		return NewLogClient(), nil
-	case "memory":
+	case Memory:
 		return NewMemoryClient(), nil
-	case "noop":
+	case Noop:
 		return NewNoopClient(), nil
 	}
 

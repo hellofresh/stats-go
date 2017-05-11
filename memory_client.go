@@ -15,7 +15,7 @@ type MemoryClient struct {
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 	httpRequestSection string
 
-	TimeMetrics  []timer.Metric
+	TimerMetrics []timer.Metric
 	CountMetrics map[string]int
 }
 
@@ -29,7 +29,7 @@ func NewMemoryClient() *MemoryClient {
 }
 
 func (sc *MemoryClient) resetMetrics() {
-	sc.TimeMetrics = []timer.Metric{}
+	sc.TimerMetrics = []timer.Metric{}
 	sc.CountMetrics = map[string]int{}
 }
 
@@ -51,7 +51,7 @@ func (sc *MemoryClient) TrackRequest(r *http.Request, t timer.Timer, success boo
 
 	t.Finish(b.Metric())
 	if memoryTimer, ok := t.(*timer.Memory); ok {
-		sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
+		sc.TimerMetrics = append(sc.TimerMetrics, memoryTimer.Elapsed())
 	}
 
 	i.IncrementAll(b)
@@ -70,7 +70,7 @@ func (sc *MemoryClient) TrackOperation(section string, operation bucket.MetricOp
 	if nil != t {
 		t.Finish(b.MetricWithSuffix())
 		if memoryTimer, ok := t.(*timer.Memory); ok {
-			sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
+			sc.TimerMetrics = append(sc.TimerMetrics, memoryTimer.Elapsed())
 		}
 	}
 
@@ -90,7 +90,7 @@ func (sc *MemoryClient) TrackOperationN(section string, operation bucket.MetricO
 	if nil != t {
 		t.Finish(b.MetricWithSuffix())
 		if memoryTimer, ok := t.(*timer.Memory); ok {
-			sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
+			sc.TimerMetrics = append(sc.TimerMetrics, memoryTimer.Elapsed())
 		}
 	}
 

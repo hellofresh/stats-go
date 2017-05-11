@@ -27,10 +27,10 @@ func TestMemoryClient_TrackRequest(t *testing.T) {
 
 	client.TrackRequest(r, tt, success)
 
-	assert.Equal(t, 1, len(client.TimeMetrics))
+	assert.Equal(t, 1, len(client.TimerMetrics))
 	assert.Equal(t, 4, len(client.CountMetrics))
 
-	assert.Equal(t, b.Metric(), client.TimeMetrics[0].Bucket)
+	assert.Equal(t, b.Metric(), client.TimerMetrics[0].Bucket)
 	assert.Equal(t, 1, client.CountMetrics[b.Metric()])
 	assert.Equal(t, 1, client.CountMetrics[b.MetricWithSuffix()])
 	assert.Equal(t, 1, client.CountMetrics[b.MetricTotal()])
@@ -38,7 +38,7 @@ func TestMemoryClient_TrackRequest(t *testing.T) {
 
 	client.Close()
 
-	assert.Equal(t, 0, len(client.TimeMetrics))
+	assert.Equal(t, 0, len(client.TimerMetrics))
 	assert.Equal(t, 0, len(client.CountMetrics))
 }
 
@@ -53,10 +53,10 @@ func TestMemoryClient_TrackOperation(t *testing.T) {
 
 	client.TrackOperation(section, operation, tt, success)
 
-	assert.Equal(t, 1, len(client.TimeMetrics))
+	assert.Equal(t, 1, len(client.TimerMetrics))
 	assert.Equal(t, 4, len(client.CountMetrics))
 
-	assert.Equal(t, b.MetricWithSuffix(), client.TimeMetrics[0].Bucket)
+	assert.Equal(t, b.MetricWithSuffix(), client.TimerMetrics[0].Bucket)
 	assert.Equal(t, 1, client.CountMetrics[b.Metric()])
 	assert.Equal(t, 1, client.CountMetrics[b.MetricWithSuffix()])
 	assert.Equal(t, 1, client.CountMetrics[b.MetricTotal()])
@@ -64,7 +64,7 @@ func TestMemoryClient_TrackOperation(t *testing.T) {
 
 	client.Close()
 
-	assert.Equal(t, 0, len(client.TimeMetrics))
+	assert.Equal(t, 0, len(client.TimerMetrics))
 	assert.Equal(t, 0, len(client.CountMetrics))
 }
 
@@ -80,10 +80,10 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 
 	client.TrackOperationN(section, operation, tt, n, success)
 
-	assert.Equal(t, 1, len(client.TimeMetrics))
+	assert.Equal(t, 1, len(client.TimerMetrics))
 	assert.Equal(t, 4, len(client.CountMetrics))
 
-	assert.Equal(t, b.MetricWithSuffix(), client.TimeMetrics[0].Bucket)
+	assert.Equal(t, b.MetricWithSuffix(), client.TimerMetrics[0].Bucket)
 	assert.Equal(t, n, client.CountMetrics[b.Metric()])
 	assert.Equal(t, n, client.CountMetrics[b.MetricWithSuffix()])
 	assert.Equal(t, n, client.CountMetrics[b.MetricTotal()])
@@ -91,7 +91,7 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 
 	client.Close()
 
-	assert.Equal(t, 0, len(client.TimeMetrics))
+	assert.Equal(t, 0, len(client.TimerMetrics))
 	assert.Equal(t, 0, len(client.CountMetrics))
 }
 

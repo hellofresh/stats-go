@@ -1,4 +1,4 @@
-package stats
+package timer
 
 import (
 	"testing"
@@ -10,7 +10,7 @@ import (
 func TestMemoryTimeTracker(t *testing.T) {
 	bucket := "test-bucket"
 
-	tt := &MemoryTimeTracker{}
+	tt := &Memory{}
 	tt.Start()
 	tt.Finish(bucket)
 

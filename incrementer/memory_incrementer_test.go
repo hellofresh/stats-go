@@ -1,13 +1,14 @@
-package stats
+package incrementer
 
 import (
 	"testing"
 
+	"github.com/hellofresh/stats-go/bucket"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMemoryIncrementer_Increment(t *testing.T) {
-	i := NewMemoryIncrementer()
+func TestMemory_Increment(t *testing.T) {
+	i := NewMemory()
 
 	metric1 := "metric-1"
 	metric2 := "metric-2"
@@ -32,10 +33,10 @@ func TestMemoryIncrementer_Increment(t *testing.T) {
 	}
 }
 
-func TestMemoryIncrementer_IncrementAll(t *testing.T) {
-	i := NewMemoryIncrementer()
-	b1 := NewBucketPlain("section1", MetricOperation{"o11", "o12", "o13"}, true)
-	b2 := NewBucketPlain("section2", MetricOperation{"o21", "o22", "o23"}, false)
+func TestMemory_IncrementAll(t *testing.T) {
+	i := NewMemory()
+	b1 := bucket.NewPlain("section1", bucket.MetricOperation{"o11", "o12", "o13"}, true)
+	b2 := bucket.NewPlain("section2", bucket.MetricOperation{"o21", "o22", "o23"}, false)
 	metricN := 5
 
 	allB1 := []string{b1.Metric(), b1.MetricWithSuffix(), b1.MetricTotal(), b1.MetricTotalWithSuffix()}

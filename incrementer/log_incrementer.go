@@ -1,28 +1,29 @@
-package stats
+package incrementer
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/stats-go/bucket"
 )
 
-// LogIncrementer struct is Incrementer interface implementation that writes all metrics to log
-type LogIncrementer struct{}
+// Log struct is Incrementer interface implementation that writes all metrics to log
+type Log struct{}
 
 // Increment writes given metric to log
-func (i *LogIncrementer) Increment(metric string) {
+func (i *Log) Increment(metric string) {
 	log.WithField("metric", metric).Debug("Muted stats counter increment")
 }
 
 // IncrementN writes given metric to log
-func (i *LogIncrementer) IncrementN(metric string, n int) {
+func (i *Log) IncrementN(metric string, n int) {
 	log.WithField("metric", metric).WithField("n", n).Debug("Muted stats counter increment by n")
 }
 
 // IncrementAll writes all metrics for given bucket to log
-func (i *LogIncrementer) IncrementAll(b Bucket) {
+func (i *Log) IncrementAll(b bucket.Bucket) {
 	incrementAll(i, b)
 }
 
 // IncrementAllN writes all metrics for given bucket to log
-func (i *LogIncrementer) IncrementAllN(b Bucket, n int) {
+func (i *Log) IncrementAllN(b bucket.Bucket, n int) {
 	incrementAllN(i, b, n)
 }

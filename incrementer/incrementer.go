@@ -1,6 +1,7 @@
-package stats
+package incrementer
 
 import (
+	"github.com/hellofresh/stats-go/bucket"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
@@ -13,28 +14,28 @@ type Incrementer interface {
 	IncrementN(metric string, n int)
 
 	// Increment increments all metrics for given bucket
-	IncrementAll(b Bucket)
+	IncrementAll(b bucket.Bucket)
 
 	// Increment increments all metrics for given bucket by n
-	IncrementAllN(b Bucket, n int)
+	IncrementAllN(b bucket.Bucket, n int)
 }
 
-// NewIncrementer builds and returns new Incrementer instance
-func NewIncrementer(c *statsd.Client, muted bool) Incrementer {
+// New builds and returns new Incrementer instance
+func New(c *statsd.Client, muted bool) Incrementer {
 	if muted {
-		return &LogIncrementer{}
+		return &Log{}
 	}
-	return &StatsdIncrementer{c}
+	return &Statsd{c}
 }
 
-func incrementAll(i Incrementer, b Bucket) {
+func incrementAll(i Incrementer, b bucket.Bucket) {
 	i.Increment(b.Metric())
 	i.Increment(b.MetricWithSuffix())
 	i.Increment(b.MetricTotal())
 	i.Increment(b.MetricTotalWithSuffix())
 }
 
-func incrementAllN(i Incrementer, b Bucket, n int) {
+func incrementAllN(i Incrementer, b bucket.Bucket, n int) {
 	i.IncrementN(b.Metric(), n)
 	i.IncrementN(b.MetricWithSuffix(), n)
 	i.IncrementN(b.MetricTotal(), n)

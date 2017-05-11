@@ -3,15 +3,19 @@ package stats
 import (
 	"net/http"
 	"sync"
+
+	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/timer"
 )
 
 // MemoryClient is Client implementation for tests
 type MemoryClient struct {
 	sync.Mutex
-	httpMetricCallback HTTPMetricNameAlterCallback
+	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 	httpRequestSection string
 
-	TimeMetrics  []TimerMetric
+	TimeMetrics  []timer.Metric
 	CountMetrics map[string]int
 }
 
@@ -25,13 +29,13 @@ func NewMemoryClient() *MemoryClient {
 }
 
 func (sc *MemoryClient) resetMetrics() {
-	sc.TimeMetrics = []TimerMetric{}
+	sc.TimeMetrics = []timer.Metric{}
 	sc.CountMetrics = map[string]int{}
 }
 
-// BuildTimeTracker builds timer to track metric timings
-func (sc *MemoryClient) BuildTimeTracker() TimeTracker {
-	return &MemoryTimeTracker{}
+// BuildTimer builds timer to track metric timings
+func (sc *MemoryClient) BuildTimer() timer.Timer {
+	return &timer.Memory{}
 }
 
 // Close resets all collected stats
@@ -41,12 +45,12 @@ func (sc *MemoryClient) Close() error {
 }
 
 // TrackRequest tracks HTTP Request stats
-func (sc *MemoryClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) Client {
-	b := NewBucketHTTPRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
-	i := NewMemoryIncrementer()
+func (sc *MemoryClient) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
+	b := bucket.NewHTTPRequest(sc.httpRequestSection, r, success, sc.httpMetricCallback)
+	i := incrementer.NewMemory()
 
-	tt.Finish(b.Metric())
-	if memoryTimer, ok := tt.(*MemoryTimeTracker); ok {
+	t.Finish(b.Metric())
+	if memoryTimer, ok := t.(*timer.Memory); ok {
 		sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
 	}
 
@@ -59,13 +63,13 @@ func (sc *MemoryClient) TrackRequest(r *http.Request, tt TimeTracker, success bo
 }
 
 // TrackOperation tracks custom operation
-func (sc *MemoryClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client {
-	b := NewBucketPlain(section, operation, success)
-	i := NewMemoryIncrementer()
+func (sc *MemoryClient) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+	b := bucket.NewPlain(section, operation, success)
+	i := incrementer.NewMemory()
 
-	if nil != tt {
-		tt.Finish(b.MetricWithSuffix())
-		if memoryTimer, ok := tt.(*MemoryTimeTracker); ok {
+	if nil != t {
+		t.Finish(b.MetricWithSuffix())
+		if memoryTimer, ok := t.(*timer.Memory); ok {
 			sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
 		}
 	}
@@ -79,13 +83,13 @@ func (sc *MemoryClient) TrackOperation(section string, operation MetricOperation
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (sc *MemoryClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client {
-	b := NewBucketPlain(section, operation, success)
-	i := NewMemoryIncrementer()
+func (sc *MemoryClient) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+	b := bucket.NewPlain(section, operation, success)
+	i := incrementer.NewMemory()
 
-	if nil != tt {
-		tt.Finish(b.MetricWithSuffix())
-		if memoryTimer, ok := tt.(*MemoryTimeTracker); ok {
+	if nil != t {
+		t.Finish(b.MetricWithSuffix())
+		if memoryTimer, ok := t.(*timer.Memory); ok {
 			sc.TimeMetrics = append(sc.TimeMetrics, memoryTimer.Elapsed())
 		}
 	}
@@ -99,7 +103,7 @@ func (sc *MemoryClient) TrackOperationN(section string, operation MetricOperatio
 }
 
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
-func (sc *MemoryClient) SetHTTPMetricCallback(callback HTTPMetricNameAlterCallback) Client {
+func (sc *MemoryClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
 	sc.Lock()
 	defer sc.Unlock()
 
@@ -118,5 +122,5 @@ func (sc *MemoryClient) SetHTTPRequestSection(section string) Client {
 
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (sc *MemoryClient) ResetHTTPRequestSection() Client {
-	return sc.SetHTTPRequestSection(sectionRequest)
+	return sc.SetHTTPRequestSection(bucket.SectionRequest)
 }

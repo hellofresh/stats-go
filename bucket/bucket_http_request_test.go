@@ -1,4 +1,4 @@
-package stats
+package bucket
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBucketHttpRequest_getRequestOperations(t *testing.T) {
+func TestHttpRequest_getRequestOperations(t *testing.T) {
 	dataProvider := []struct {
 		Method     string
 		Path       string
@@ -79,7 +79,7 @@ func TestBucketHttpRequest_getRequestOperations(t *testing.T) {
 	}
 }
 
-func TestBucketHttpRequest_MetricNameAlterCallback(t *testing.T) {
+func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 	dataProvider := []struct {
 		Method     string
 		Path       string
@@ -117,7 +117,7 @@ func TestBucketHttpRequest_MetricNameAlterCallback(t *testing.T) {
 	}
 }
 
-func TestBucketHttpRequest_Metric(t *testing.T) {
+func TestHttpRequest_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -135,12 +135,12 @@ func TestBucketHttpRequest_Metric(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
 
-func TestBucketHttpRequest_MetricWithSuffix(t *testing.T) {
+func TestHttpRequest_MetricWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -153,12 +153,12 @@ func TestBucketHttpRequest_MetricWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
 
-func TestBucketHttpRequest_MetricTotal(t *testing.T) {
+func TestHttpRequest_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -171,12 +171,12 @@ func TestBucketHttpRequest_MetricTotal(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
 
-func TestBucketHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
+func TestHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Method  string
 		Path    string
@@ -189,12 +189,12 @@ func TestBucketHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(sectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }
 
-func TestBucketHttpRequest_Metric_customSection(t *testing.T) {
+func TestHttpRequest_Metric_customSection(t *testing.T) {
 	section := "section111"
 	dataProvider := []struct {
 		Method  string
@@ -208,12 +208,12 @@ func TestBucketHttpRequest_Metric_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(section, r, data.Success, nil)
+		b := NewHTTPRequest(section, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
 
-func TestBucketHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
+func TestHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
 	section := "section111"
 	dataProvider := []struct {
 		Method  string
@@ -227,7 +227,7 @@ func TestBucketHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewBucketHTTPRequest(section, r, data.Success, nil)
+		b := NewHTTPRequest(section, r, data.Success, nil)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }

@@ -1,4 +1,4 @@
-package stats
+package bucket
 
 import (
 	"strings"
@@ -9,16 +9,16 @@ import (
 const (
 	totalBucket = "total"
 
-	sectionRequest = "request"
-
 	suffixStatusOk   = "ok"
 	suffixStatusFail = "fail"
 
 	prefixUnicode = "-u-"
 
+	// SectionRequest is default section name for tracking HTTP requests
+	SectionRequest = "request"
+
 	// MetricEmptyPlaceholder is a string placeholder for empty (unset) sections of operation
 	MetricEmptyPlaceholder = "-"
-
 	// MetricIDPlaceholder is a string placeholder for ID section of operation if any
 	MetricIDPlaceholder = "-id-"
 )

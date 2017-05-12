@@ -40,6 +40,11 @@ func (c *NoopClient) TrackOperationN(section string, operation bucket.MetricOper
 	return c
 }
 
+// TrackState tracks metric absolute value
+func (c *NoopClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+	return c
+}
+
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 func (c *NoopClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
 	return c

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 )
 
@@ -17,6 +18,7 @@ type MemoryClient struct {
 
 	TimerMetrics []timer.Metric
 	CountMetrics map[string]int
+	StateMetrics map[string]int
 }
 
 // NewMemoryClient builds and returns new MemoryClient instance
@@ -31,6 +33,7 @@ func NewMemoryClient() *MemoryClient {
 func (sc *MemoryClient) resetMetrics() {
 	sc.TimerMetrics = []timer.Metric{}
 	sc.CountMetrics = map[string]int{}
+	sc.StateMetrics = map[string]int{}
 }
 
 // BuildTimer builds timer to track metric timings
@@ -97,6 +100,19 @@ func (sc *MemoryClient) TrackOperationN(section string, operation bucket.MetricO
 	i.IncrementAllN(b, n)
 	for metric, value := range i.Metrics() {
 		sc.CountMetrics[metric] += value
+	}
+
+	return sc
+}
+
+// TrackState tracks metric absolute value
+func (sc *MemoryClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+	b := bucket.NewPlain(section, operation, true)
+	s := state.NewMemory()
+
+	s.Set(b.Metric(), value)
+	for metric, value := range s.Metrics() {
+		sc.StateMetrics[metric] = value
 	}
 
 	return sc

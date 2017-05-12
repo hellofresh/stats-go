@@ -20,8 +20,7 @@ func (t *Log) Start() Timer {
 // Finish writes elapsed time for metric to log
 func (t *Log) Finish(bucket string) {
 	log.WithFields(log.Fields{
-		"bucket":   bucket,
-		"elapsed":  int(time.Now().Sub(t.timerStart) / time.Millisecond),
-		"sampling": "ms",
+		"bucket":  bucket,
+		"elapsed": time.Now().Sub(t.timerStart).String(),
 	}).Debug("Muted stats timer send")
 }

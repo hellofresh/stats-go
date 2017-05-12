@@ -86,6 +86,9 @@ timing := statsClient.BuildTimeTracker().Start()
 operations := statsClient.MetricOperation{"orders", "order", "create"}
 err := orderService.Create(...)
 statsClient.TrackOperation("ordering", operations, timing, err == nil)
+
+ordersInLast24h := orderService.Count(time.Duration(24)*time.Hour)
+statsClient.TrackState("ordering", operations, ordersInLast24h)
 ```
 
 #### Track requests metrics with middleware, e.g. for [Gin Web Framework](https://github.com/gin-gonic/gin)

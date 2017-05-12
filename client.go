@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/timer"
 )
 
 const (
@@ -23,21 +26,21 @@ var ErrUnknownClient = errors.New("Unknown stats client type")
 
 // Client is an interface for different methods of gathering stats
 type Client interface {
-	// BuildTimeTracker builds timer to track metric timings
-	BuildTimeTracker() TimeTracker
+	// BuildTimer builds timer to track metric timings
+	BuildTimer() timer.Timer
 	// Close closes underlying client connection if any
 	Close() error
 
 	// TrackRequest tracks HTTP Request stats
-	TrackRequest(r *http.Request, tt TimeTracker, success bool) Client
+	TrackRequest(r *http.Request, t timer.Timer, success bool) Client
 
 	// TrackOperation tracks custom operation
-	TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client
+	TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client
 	// TrackOperationN tracks custom operation with n diff
-	TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client
+	TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client
 
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
-	SetHTTPMetricCallback(callback HTTPMetricNameAlterCallback) Client
+	SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client
 
 	// SetHTTPRequestSection sets metric section for HTTP Request metrics
 	SetHTTPRequestSection(section string) Client

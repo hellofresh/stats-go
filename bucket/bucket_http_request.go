@@ -1,4 +1,4 @@
-package stats
+package bucket
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 // HTTPMetricNameAlterCallback is a type for HTTP Request metric alter handler
 type HTTPMetricNameAlterCallback func(metricParts MetricOperation, r *http.Request) MetricOperation
 
-// BucketHTTPRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
+// HTTPRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
 // Metrics has the following formats for methods:
 //  Metric() -> <section>.<method>.<path-level-0>.<path-level-1>
 //  MetricWithSuffix() -> <section>-ok|fail.<method>.<path-level-0>.<path-level-1>
@@ -16,16 +16,16 @@ type HTTPMetricNameAlterCallback func(metricParts MetricOperation, r *http.Reque
 //  MetricTotalWithSuffix() -> total-ok|fail.<section>
 //
 // Normally "<section>" is set to "request", but you can use any string value here.
-type BucketHTTPRequest struct {
-	*BucketPlain
+type HTTPRequest struct {
+	*Plain
 	r        *http.Request
 	callback HTTPMetricNameAlterCallback
 }
 
-// NewBucketHTTPRequest builds and returns new BucketHTTPRequest instance
-func NewBucketHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback) *BucketHTTPRequest {
+// NewHTTPRequest builds and returns new HTTPRequest instance
+func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback) *HTTPRequest {
 	operations := getRequestOperations(r, callback)
-	return &BucketHTTPRequest{NewBucketPlain(section, operations, success), r, callback}
+	return &HTTPRequest{NewPlain(section, operations, success), r, callback}
 }
 
 func getRequestOperations(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {

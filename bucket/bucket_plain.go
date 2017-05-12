@@ -1,4 +1,4 @@
-package stats
+package bucket
 
 import (
 	"fmt"
@@ -8,42 +8,42 @@ import (
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation [3]string
 
-// BucketPlain struct in an implementation of Bucket interface that produces metric names for given section and operation
-type BucketPlain struct {
+// Plain struct in an implementation of Bucket interface that produces metric names for given section and operation
+type Plain struct {
 	section   string
 	operation string
 	success   bool
 }
 
-// NewBucketPlain builds and returns new BucketPlain instance
-func NewBucketPlain(section string, operation MetricOperation, success bool) *BucketPlain {
+// NewPlain builds and returns new Plain instance
+func NewPlain(section string, operation MetricOperation, success bool) *Plain {
 	operationSanitized := make([]string, cap(operation))
 	for k, v := range operation {
 		operationSanitized[k] = SanitizeMetricName(v)
 	}
-	return &BucketPlain{SanitizeMetricName(section), strings.Join(operationSanitized, "."), success}
+	return &Plain{SanitizeMetricName(section), strings.Join(operationSanitized, "."), success}
 }
 
 // Metric builds simple metric name in the form:
 //  <section>.<operation-0>.<operation-1>.<operation-2>
-func (b *BucketPlain) Metric() string {
+func (b *Plain) Metric() string {
 	return fmt.Sprintf("%s.%s", b.section, b.operation)
 }
 
 // MetricWithSuffix builds metric name with success suffix in the form:
 //  <section>-ok|fail.<operation-0>.<operation-1>.<operation-2>
-func (b *BucketPlain) MetricWithSuffix() string {
+func (b *Plain) MetricWithSuffix() string {
 	return fmt.Sprintf("%s-%s.%s", b.section, getOperationStatus(b.success), b.operation)
 }
 
 // MetricTotal builds simple total metric name in the form:
 //  total.<section>
-func (b *BucketPlain) MetricTotal() string {
+func (b *Plain) MetricTotal() string {
 	return fmt.Sprintf("%s.%s", totalBucket, b.section)
 }
 
 // MetricTotalWithSuffix builds total metric name with success suffix in the form
 //  total-ok|fail.<section>
-func (b *BucketPlain) MetricTotalWithSuffix() string {
+func (b *Plain) MetricTotalWithSuffix() string {
 	return fmt.Sprintf("%s.%s-%s", totalBucket, b.section, getOperationStatus(b.success))
 }

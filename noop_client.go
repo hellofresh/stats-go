@@ -1,6 +1,11 @@
 package stats
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/timer"
+)
 
 // NoopClient is Client implementation that does literally nothing
 type NoopClient struct{}
@@ -10,9 +15,9 @@ func NewNoopClient() *NoopClient {
 	return &NoopClient{}
 }
 
-// BuildTimeTracker builds timer to track metric timings
-func (c *NoopClient) BuildTimeTracker() TimeTracker {
-	return &MemoryTimeTracker{}
+// BuildTimer builds timer to track metric timings
+func (c *NoopClient) BuildTimer() timer.Timer {
+	return &timer.Memory{}
 }
 
 // Close closes underlying client connection if any
@@ -21,22 +26,22 @@ func (c *NoopClient) Close() error {
 }
 
 // TrackRequest tracks HTTP Request stats
-func (c *NoopClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) Client {
+func (c *NoopClient) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
 	return c
 }
 
 // TrackOperation tracks custom operation
-func (c *NoopClient) TrackOperation(section string, operation MetricOperation, tt TimeTracker, success bool) Client {
+func (c *NoopClient) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
 	return c
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *NoopClient) TrackOperationN(section string, operation MetricOperation, tt TimeTracker, n int, success bool) Client {
+func (c *NoopClient) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	return c
 }
 
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
-func (c *NoopClient) SetHTTPMetricCallback(callback HTTPMetricNameAlterCallback) Client {
+func (c *NoopClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
 	return c
 }
 

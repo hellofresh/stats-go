@@ -1,4 +1,4 @@
-package stats
+package bucket
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBucketPlain_Metric(t *testing.T) {
+func TestPlain_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
 		Operation MetricOperation
@@ -21,12 +21,12 @@ func TestBucketPlain_Metric(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewBucketPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
 
-func TestBucketPlain_MetricWithSuffix(t *testing.T) {
+func TestPlain_MetricWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
 		Operation MetricOperation
@@ -38,12 +38,12 @@ func TestBucketPlain_MetricWithSuffix(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewBucketPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
 
-func TestBucketPlain_MetricTotal(t *testing.T) {
+func TestPlain_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
 		Operation MetricOperation
@@ -55,12 +55,12 @@ func TestBucketPlain_MetricTotal(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewBucketPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success)
 		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
 
-func TestBucketPlain_MetricTotalWithSuffix(t *testing.T) {
+func TestPlain_MetricTotalWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
 		Operation MetricOperation
@@ -72,7 +72,7 @@ func TestBucketPlain_MetricTotalWithSuffix(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewBucketPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success)
 		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }

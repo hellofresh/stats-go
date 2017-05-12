@@ -106,7 +106,7 @@ func NewStatsRequest(sc stats.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.WithField("path", c.Request.URL.Path).Debug("Starting Stats middleware")
 
-		timing := sc.BuildTimeTracker().Start()
+		timing := sc.BuildTimer().Start()
 
 		c.Next()
 
@@ -150,13 +150,16 @@ func main() {
 ```go
 package foo
 
-import "github.com/hellofresh/stats-go"
+import (
+        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/bucket"
+)
 
 const sectionStatsFoo = "foo"
 
 func DoSomeJob(statsClient stats.Client) error {
-        tt := statsClient.BuildTimeTracker().Start()
-        operation := stats.MetricOperation{"do", "some", "job"}
+        tt := statsClient.BuildTimer().Start()
+        operation := bucket.MetricOperation{"do", "some", "job"}
 
         result, err := doSomeRealJobHere()
         statsClient.TrackOperation(sectionStatsFoo, operation, tt, result)
@@ -171,7 +174,7 @@ package foo
 import (
         "testing"
 
-        "github.com/hellofresh/stats-go"
+        stats "github.com/hellofresh/stats-go"
         "github.com/stretchr/testify/assert"
 )
 
@@ -182,8 +185,8 @@ func TestDoSomeJob(t *testing.T) {
         assert.Nil(t, err)
         
         statsMemory, _ := statsClient.(stats.MemoryClient)
-        assert.Equal(t, 1, len(statsMemory.TimeMetrics))
-        assert.Equal(t, "foo-ok.do.some.job", statsMemory.TimeMetrics[0].Bucket)
+        assert.Equal(t, 1, len(statsMemory.TimerMetrics))
+        assert.Equal(t, "foo-ok.do.some.job", statsMemory.TimerMetrics[0].Bucket)
         assert.Equal(t, 1, statsMemory.CountMetrics["foo-ok.do.some.job"])
 }
 ```
@@ -230,16 +233,17 @@ import (
         "github.com/example/app/middleware"
         "github.com/gin-gonic/gin"
         stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/bucket"
 )
 
 func main() {
         // STATS_IDS=users:not_empty:clients:numeric
-        sectionsTestsMap, err := stats.ParseSectionsTestsMap(os.Getenv("STATS_IDS"))
+        sectionsTestsMap, err := bucket.ParseSectionsTestsMap(os.Getenv("STATS_IDS"))
         if err != nil {
-                sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
+                sectionsTestsMap = map[bucket.PathSection]bucket.SectionTestDefinition{}
         }
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
-        statsClient.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+        statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
         defer statsClient.Close()
 
         router := gin.Default()

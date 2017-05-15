@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/timer"
 	"github.com/stretchr/testify/assert"
+	"reflect"
 )
 
 func TestMemoryClient_BuildTimeTracker(t *testing.T) {
@@ -116,6 +117,20 @@ func TestMemoryClient_TrackState(t *testing.T) {
 	assert.Equal(t, 2, len(client.StateMetrics))
 	assert.Equal(t, state12, client.StateMetrics[bucket.NewPlain(section, operation1, true).Metric()])
 	assert.Equal(t, state2, client.StateMetrics[bucket.NewPlain(section, operation2, true).Metric()])
+}
+
+func TestMemoryClient_SetHTTPMetricCallback(t *testing.T) {
+	client := NewMemoryClient()
+	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
+		return metricParts
+	}
+
+	client.SetHTTPMetricCallback(callback)
+	// asserting functions directly gives false result:
+	// Not equal: (func(bucket.MetricOperation, *http.Request) bucket.MetricOperation)(0x1255160) (expected)
+	//     != (bucket.HTTPMetricNameAlterCallback)(0x1255160) (actual)
+	// so we assert objects pointers directly to make sure this is the same function object
+	assert.Equal(t, reflect.ValueOf(callback).Pointer(), reflect.ValueOf(client.GetHTTPMetricCallback()).Pointer())
 }
 
 func TestMemoryClient_SetHTTPRequestSection(t *testing.T) {

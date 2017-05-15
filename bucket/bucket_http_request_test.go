@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHttpRequest_getRequestOperations(t *testing.T) {
+func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	dataProvider := []struct {
 		Method     string
 		Path       string
@@ -75,7 +75,7 @@ func TestHttpRequest_getRequestOperations(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		assert.Equal(t, data.Operations, getRequestOperations(r, callback))
+		assert.Equal(t, data.Operations, BuildHTTPRequestMetricOperation(r, callback))
 	}
 }
 
@@ -113,7 +113,7 @@ func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path, RawQuery: data.Query}}
-		assert.Equal(t, data.Operations, getRequestOperations(r, callback))
+		assert.Equal(t, data.Operations, BuildHTTPRequestMetricOperation(r, callback))
 	}
 }
 

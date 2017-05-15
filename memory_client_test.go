@@ -3,12 +3,12 @@ package stats
 import (
 	"net/http"
 	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/timer"
 	"github.com/stretchr/testify/assert"
-	"reflect"
 )
 
 func TestMemoryClient_BuildTimeTracker(t *testing.T) {

@@ -95,6 +95,29 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 	assert.Equal(t, 0, len(client.CountMetrics))
 }
 
+func TestMemoryClient_TrackState(t *testing.T) {
+	client := NewMemoryClient()
+
+	section := "test-section"
+	operation1 := bucket.MetricOperation{"o1", "o2", "o3"}
+	operation2 := bucket.MetricOperation{"p1", "p2", "p3"}
+	state1 := 13
+	state2 := 66
+	state12 := 77
+
+	client.TrackState(section, operation1, state1)
+	client.TrackState(section, operation2, state2)
+
+	assert.Equal(t, 2, len(client.StateMetrics))
+	assert.Equal(t, state1, client.StateMetrics[bucket.NewPlain(section, operation1, true).Metric()])
+	assert.Equal(t, state2, client.StateMetrics[bucket.NewPlain(section, operation2, true).Metric()])
+
+	client.TrackState(section, operation1, state12)
+	assert.Equal(t, 2, len(client.StateMetrics))
+	assert.Equal(t, state12, client.StateMetrics[bucket.NewPlain(section, operation1, true).Metric()])
+	assert.Equal(t, state2, client.StateMetrics[bucket.NewPlain(section, operation2, true).Metric()])
+}
+
 func TestMemoryClient_SetHTTPRequestSection(t *testing.T) {
 	client := NewMemoryClient()
 

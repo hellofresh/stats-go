@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -97,6 +98,16 @@ func (sc *StatsdClient) TrackOperationN(section string, operation bucket.MetricO
 		t.Finish(b.MetricWithSuffix())
 	}
 	i.IncrementAllN(b, n)
+
+	return sc
+}
+
+// TrackState tracks metric absolute value
+func (sc *StatsdClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+	b := bucket.NewPlain(section, operation, true)
+	s := state.New(sc.client, sc.muted)
+
+	s.Set(b.Metric(), value)
 
 	return sc
 }

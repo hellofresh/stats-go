@@ -39,12 +39,14 @@ type Client interface {
 	// TrackOperationN tracks custom operation with n diff
 	TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client
 
+	// TrackState tracks metric absolute value
+	TrackState(section string, operation bucket.MetricOperation, value int) Client
+
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 	SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client
 
 	// SetHTTPRequestSection sets metric section for HTTP Request metrics
 	SetHTTPRequestSection(section string) Client
-
 	// ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 	ResetHTTPRequestSection() Client
 }

@@ -44,6 +44,8 @@ type Client interface {
 
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 	SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client
+	// GetHTTPMetricCallback gets callback handler that allows metric operation alteration for HTTP Request
+	GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallback
 
 	// SetHTTPRequestSection sets metric section for HTTP Request metrics
 	SetHTTPRequestSection(section string) Client

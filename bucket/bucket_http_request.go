@@ -24,11 +24,12 @@ type HTTPRequest struct {
 
 // NewHTTPRequest builds and returns new HTTPRequest instance
 func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback) *HTTPRequest {
-	operations := getRequestOperations(r, callback)
-	return &HTTPRequest{NewPlain(section, operations, success), r, callback}
+	operation := BuildHTTPRequestMetricOperation(r, callback)
+	return &HTTPRequest{NewPlain(section, operation, success), r, callback}
 }
 
-func getRequestOperations(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {
+// BuildHTTPRequestMetricOperation builds metric operation from HTTP request
+func BuildHTTPRequestMetricOperation(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {
 	metricParts := MetricOperation{strings.ToLower(r.Method), MetricEmptyPlaceholder, MetricEmptyPlaceholder}
 	if r.URL.Path != "/" {
 		partsFilled := 1

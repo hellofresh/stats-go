@@ -2,13 +2,17 @@ package stats
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/timer"
 )
 
 // NoopClient is Client implementation that does literally nothing
-type NoopClient struct{}
+type NoopClient struct {
+	sync.Mutex
+	httpMetricCallback bucket.HTTPMetricNameAlterCallback
+}
 
 // NewNoopClient builds and returns new NoopClient instance
 func NewNoopClient() *NoopClient {
@@ -47,7 +51,19 @@ func (c *NoopClient) TrackState(section string, operation bucket.MetricOperation
 
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 func (c *NoopClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
+	c.Lock()
+	defer c.Unlock()
+
+	c.httpMetricCallback = callback
 	return c
+}
+
+// GetHTTPMetricCallback gets callback handler that allows metric operation alteration for HTTP Request
+func (c *NoopClient) GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallback {
+	c.Lock()
+	defer c.Unlock()
+
+	return c.httpMetricCallback
 }
 
 // SetHTTPRequestSection sets metric section for HTTP Request metrics

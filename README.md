@@ -82,7 +82,7 @@ func main() {
 #### Count metrics manually
 
 ```go
-timing := statsClient.BuildTimeTracker().Start()
+timing := statsClient.BuildTimer().Start()
 operations := statsClient.MetricOperation{"orders", "order", "create"}
 err := orderService.Create(...)
 statsClient.TrackOperation("ordering", operations, timing, err == nil)

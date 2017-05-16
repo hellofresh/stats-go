@@ -43,7 +43,7 @@ package main
 import (
         "os"
 
-        "github.com/hellofresh/stats-go"
+        stats "github.com/hellofresh/stats-go"
 )
 
 func main() {
@@ -82,8 +82,10 @@ func main() {
 #### Count metrics manually
 
 ```go
+import "github.com/hellofresh/stats-go/bucket"
+
 timing := statsClient.BuildTimer().Start()
-operations := statsClient.MetricOperation{"orders", "order", "create"}
+operations := bucket.MetricOperation{"orders", "order", "create"}
 err := orderService.Create(...)
 statsClient.TrackOperation("ordering", operations, timing, err == nil)
 

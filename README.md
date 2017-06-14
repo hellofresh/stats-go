@@ -101,9 +101,9 @@ package middleware
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go"
+	log "github.com/sirupsen/logrus"
 )
 
 // NewStatsRequest returns a middleware handler function.
@@ -131,7 +131,7 @@ import (
 
         "github.com/example/app/middleware"
         "github.com/gin-gonic/gin"
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
 )
 
 func main() {
@@ -156,7 +156,7 @@ func main() {
 package foo
 
 import (
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
         "github.com/hellofresh/stats-go/bucket"
 )
 
@@ -179,7 +179,7 @@ package foo
 import (
         "testing"
 
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
         "github.com/stretchr/testify/assert"
 )
 
@@ -237,7 +237,7 @@ import (
 
         "github.com/example/app/middleware"
         "github.com/gin-gonic/gin"
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
         "github.com/hellofresh/stats-go/bucket"
 )
 

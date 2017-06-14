@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"testing"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/Sirupsen/logrus/hooks/test"
 	"github.com/hellofresh/stats-go/bucket"
+	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,7 +3,7 @@ package timer
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Log struct is Timer interface implementation that writes all timings to log

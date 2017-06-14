@@ -1,8 +1,8 @@
 package incrementer
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/stats-go/bucket"
+	log "github.com/sirupsen/logrus"
 )
 
 // Log struct is Incrementer interface implementation that writes all metrics to log

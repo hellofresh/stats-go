@@ -1,14 +1,16 @@
-hash: 3eb48d8d0e24707e5aa9dd6ce45c8967a444254b2ac728d6f210f689584063e7
-updated: 2017-04-04T13:03:00.396601322+02:00
+hash: 9cdd3716cbbbec032ce72480cec367a87d4b9740213a435b0917b0da557f1346
+updated: 2017-06-14T17:57:57.194245211+02:00
 imports:
 - name: github.com/fiam/gounidecode
   version: 8deddbd03fec2c28969266e52f27b6fb22be1823
   subpackages:
   - unidecode
-- name: github.com/Sirupsen/logrus
-  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/sirupsen/logrus
+  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+  subpackages:
+  - hooks/test
 - name: golang.org/x/sys
-  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:
   - unix
 - name: gopkg.in/alexcesaro/statsd.v2

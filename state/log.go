@@ -1,7 +1,7 @@
 package state
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Log struct is State interface implementation that writes all states to log

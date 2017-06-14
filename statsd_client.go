@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"sync"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
+	log "github.com/sirupsen/logrus"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 

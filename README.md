@@ -185,11 +185,11 @@ import (
 
 func TestDoSomeJob(t *testing.T) {
         statsClient, _ := stats.NewClient("memory://", "") 
-        
+
         err := DoSomeJob(statsClient)
         assert.Nil(t, err)
-        
-        statsMemory, _ := statsClient.(stats.MemoryClient)
+
+        statsMemory, _ := statsClient.(*stats.MemoryClient)
         assert.Equal(t, 1, len(statsMemory.TimerMetrics))
         assert.Equal(t, "foo-ok.do.some.job", statsMemory.TimerMetrics[0].Bucket)
         assert.Equal(t, 1, statsMemory.CountMetrics["foo-ok.do.some.job"])

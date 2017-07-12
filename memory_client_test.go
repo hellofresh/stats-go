@@ -96,6 +96,53 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 	assert.Equal(t, 0, len(client.CountMetrics))
 }
 
+func TestMemoryClient_TrackMetric(t *testing.T) {
+	client := NewMemoryClient()
+
+	section := "test-section"
+	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	b := bucket.NewPlain(section, operation, true)
+
+	client.TrackMetric(section, operation)
+
+	assert.Equal(t, 0, len(client.TimerMetrics))
+	assert.Equal(t, 2, len(client.CountMetrics))
+
+	assert.Equal(t, 1, client.CountMetrics[b.Metric()])
+	assert.Equal(t, 0, client.CountMetrics[b.MetricWithSuffix()])
+	assert.Equal(t, 1, client.CountMetrics[b.MetricTotal()])
+	assert.Equal(t, 0, client.CountMetrics[b.MetricTotalWithSuffix()])
+
+	client.Close()
+
+	assert.Equal(t, 0, len(client.TimerMetrics))
+	assert.Equal(t, 0, len(client.CountMetrics))
+}
+
+func TestMemoryClient_TrackMetricN(t *testing.T) {
+	client := NewMemoryClient()
+
+	section := "test-section"
+	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	n := 5
+	b := bucket.NewPlain(section, operation, true)
+
+	client.TrackMetricN(section, operation, n)
+
+	assert.Equal(t, 0, len(client.TimerMetrics))
+	assert.Equal(t, 2, len(client.CountMetrics))
+
+	assert.Equal(t, n, client.CountMetrics[b.Metric()])
+	assert.Equal(t, 0, client.CountMetrics[b.MetricWithSuffix()])
+	assert.Equal(t, n, client.CountMetrics[b.MetricTotal()])
+	assert.Equal(t, 0, client.CountMetrics[b.MetricTotalWithSuffix()])
+
+	client.Close()
+
+	assert.Equal(t, 0, len(client.TimerMetrics))
+	assert.Equal(t, 0, len(client.CountMetrics))
+}
+
 func TestMemoryClient_TrackState(t *testing.T) {
 	client := NewMemoryClient()
 

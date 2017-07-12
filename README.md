@@ -26,6 +26,7 @@ dashboards to track activity and problems.
 * Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
 * Easy to build HTTP requests metrics - timing and count
 * Generalise or modify HTTP Requests metric - e.g. skip ID part
+* Hook for [`logrus`](https://github.com/sirupsen/logrus) to monitor application error logs
 
 ## Installation
 
@@ -75,9 +76,11 @@ func main() {
 import "github.com/hellofresh/stats-go/bucket"
 
 timing := statsClient.BuildTimer().Start()
-operations := bucket.MetricOperation{"orders", "order", "create"}
+operation := bucket.MetricOperation{"orders", "order", "create"}
 err := orderService.Create(...)
-statsClient.TrackOperation("ordering", operations, timing, err == nil)
+statsClient.TrackOperation("ordering", operation, timing, err == nil)
+
+statsClient.TrackMetric("requests", operation)
 
 ordersInLast24h := orderService.Count(time.Duration(24)*time.Hour)
 statsClient.TrackState("ordering", operations, ordersInLast24h)
@@ -137,6 +140,37 @@ func main() {
         })
 
         router.Run(":8080")
+}
+```
+
+#### Usage for error logs monitoring
+
+```go
+package foo
+
+import (
+        "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/hooks"
+        log "github.com/sirupsen/logrus"
+)
+
+const sectionErrors = "errors"
+
+func initErrorsMonitoring(statsClient stats.Client) {
+        hook := hooks.NewLogrusHook(statsClient, sectionErrors)
+        log.AddHook(hook)
+
+        // will not produce any metrics
+        log.Debug("debug")
+        log.Info("info")
+        log.Warn("warn")
+
+        // will produce metrics:
+        // <section>.<level>.-.-
+        // total.<section>
+        log.Error("error")
+        log.Panic("panic")
+        log.Falat("fatal")
 }
 ```
 

@@ -38,6 +38,11 @@ type Client interface {
 	// TrackOperationN tracks custom operation with n diff
 	TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client
 
+	// TrackMetric tracks custom metric, w/out ok/fail additional sections
+	TrackMetric(section string, operation bucket.MetricOperation) Client
+	// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
+	TrackMetricN(section string, operation bucket.MetricOperation, n int) Client
+
 	// TrackState tracks metric absolute value
 	TrackState(section string, operation bucket.MetricOperation, value int) Client
 

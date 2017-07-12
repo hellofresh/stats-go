@@ -85,5 +85,5 @@ func TestSectionsTestsMap_String(t *testing.T) {
 	m, err := ParseSectionsTestsMap("foo:true:bar:numeric:baz:not_empty")
 	require.NoError(t, err)
 
-	assert.Equal(t, "[foo: true, bar: numeric, baz: not_empty]", m.String())
+	assert.Equal(t, "[bar: numeric, baz: not_empty, foo: true]", m.String())
 }

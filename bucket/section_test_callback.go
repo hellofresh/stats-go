@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,6 +54,7 @@ func (m SectionsTestsMap) String() string {
 		sections = append(sections, fmt.Sprintf("%s: %s", k, v.Name))
 	}
 
+	sort.Strings(sections)
 	return fmt.Sprintf("[%s]", strings.Join(sections, ", "))
 }
 

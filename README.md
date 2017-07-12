@@ -63,16 +63,6 @@ func main() {
         noopClient, _ := stats.NewClient("noop://", "")
         defer noopClient.Close()
 
-        // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        // format for backward compatibility with previous version
-        legacyStatsdClient, _ := stats.NewClient("statsd-host:8125", "my.app.prefix")
-        defer legacyStatsdClient.Close()
-
-        // debug log backend for stats
-        // format for backward compatibility with previous version
-        legacyLogClient, _ := stats.NewClient("", "")
-        defer legacyLogClient.Close()
-
         // get settings from env to determine backend and prefix
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()

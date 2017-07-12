@@ -2,7 +2,6 @@ package stats
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -55,19 +54,9 @@ type Client interface {
 
 // NewClient creates and builds new stats client instance by given dsn
 func NewClient(dsn, prefix string) (Client, error) {
-	// for backward compatibility
-	if dsn == "" {
-		return NewStatsdClient(dsn, prefix), nil
-	}
-
 	dsnURL, err := url.Parse(dsn)
 	if err != nil {
 		return nil, err
-	}
-
-	// backward compatibility statsd dsn - "<statsd.host>:<port>"
-	if fmt.Sprintf("%s:%s", dsnURL.Scheme, dsnURL.Opaque) == dsn {
-		return NewStatsdClient(dsn, prefix), nil
 	}
 
 	switch dsnURL.Scheme {

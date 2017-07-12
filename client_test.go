@@ -7,18 +7,11 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	client, err := NewClient("", "")
+	client, err := NewClient("statsd://", "")
 	assert.NoError(t, err)
 	assert.IsType(t, &StatsdClient{}, client)
 
 	statsdClient, _ := client.(*StatsdClient)
-	assert.True(t, statsdClient.muted)
-
-	client, err = NewClient("statsd://", "")
-	assert.NoError(t, err)
-	assert.IsType(t, &StatsdClient{}, client)
-
-	statsdClient, _ = client.(*StatsdClient)
 	assert.True(t, statsdClient.muted)
 
 	client, err = NewClient("log://", "")

@@ -27,7 +27,7 @@ FAIL="${ERROR_COLOR}FAIL ${NO_COLOR}"
 TARGETS=$@
 
 echo "${OK_COLOR}Running tests: ${NO_COLOR}"
-go test -v -race ${TARGETS}
+go test -race -cover ${TARGETS}
 
 echo "${OK_COLOR}Formatting: ${NO_COLOR}"
 ERRS=$(find . -type f -name \*.go | grep -v vendor | xargs gofmt -l 2>&1 || true)

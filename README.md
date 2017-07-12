@@ -238,7 +238,9 @@ func main() {
                 sectionsTestsMap = map[bucket.PathSection]bucket.SectionTestDefinition{}
         }
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
-        statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+        statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
+                HasIDAtSecondLevel: sectionsTestsMap,
+        }))
         defer statsClient.Close()
 
         router := gin.Default()

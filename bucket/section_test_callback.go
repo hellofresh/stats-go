@@ -84,7 +84,7 @@ var (
 // SecondLevelIDConfig configuration struct for second level ID callback
 type SecondLevelIDConfig struct {
 	HasIDAtSecondLevel    SectionsTestsMap
-	AutoDiscoverEnabled   bool
+	AutoDiscoverThreshold uint
 	AutoDiscoverWhiteList []string
 
 	autoDiscoverStorage  *metricStorage
@@ -94,8 +94,8 @@ type SecondLevelIDConfig struct {
 // NewHasIDAtSecondLevelCallback returns HttpMetricNameAlterCallback implementation that checks for IDs
 // on the second level of HTTP Request path
 func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAlterCallback {
-	if config.AutoDiscoverEnabled {
-		config.autoDiscoverStorage = newMetricStorage()
+	if config.AutoDiscoverThreshold > 0 {
+		config.autoDiscoverStorage = newMetricStorage(config.AutoDiscoverThreshold)
 
 		// convert array to map for easier search
 		config.autoDiscoverWhiteMap = make(map[string]bool, len(config.AutoDiscoverWhiteList))
@@ -117,7 +117,7 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 			if testFunction.Callback(PathSection(operation[2])) {
 				operation[2] = MetricIDPlaceholder
 			}
-		} else if config.AutoDiscoverEnabled {
+		} else if config.AutoDiscoverThreshold > 0 {
 			if _, ok := config.autoDiscoverWhiteMap[firstFragment]; !ok {
 				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation[2]) {
 					log.WithField("operation", operation).Error("Second level ID auto-discover found suspicious metric")

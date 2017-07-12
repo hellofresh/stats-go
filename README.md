@@ -239,7 +239,9 @@ func main() {
         }
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
-                HasIDAtSecondLevel: sectionsTestsMap,
+                HasIDAtSecondLevel:    sectionsTestsMap,
+                AutoDiscoverThreshold: 25,
+                AutoDiscoverWhiteList: []string{"products"},
         }))
         defer statsClient.Close()
 
@@ -257,6 +259,15 @@ func main() {
         router.GET("/clients/:id", func(c *gin.Context) {
                 // will produce "<prefix>.get.clients.-id-" metric
                 c.JSON(http.StatusOK, "Get the client ID " + c.Params.ByName("id"))
+        })
+        router.GET("/ingredients/:id", func(c *gin.Context) {
+                // will produce "<prefix>.get.ingredients.<id>" metric for the first AutoDiscoverThreshold requests
+                // and then will produce "<prefix>.get.ingredients.-id-" metric for the rest of requests
+                c.JSON(http.StatusOK, "Get the ingredient ID " + c.Params.ByName("id"))
+        })
+        router.GET("/products/:id", func(c *gin.Context) {
+                // will produce "<prefix>.get.products.<id>" metric
+                c.JSON(http.StatusOK, "Get the product ID " + c.Params.ByName("id"))
         })
 
         router.Run(":8080")

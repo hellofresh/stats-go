@@ -54,7 +54,7 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		{"GET", "/clients/qwe123", MetricOperation{"get", "clients", MetricIDPlaceholder}},
 	}
 
-	callback := NewHasIDAtSecondLevelCallback(&SecondLevelIDConfig{
+	idConfig := &SecondLevelIDConfig{
 		HasIDAtSecondLevel: map[PathSection]SectionTestDefinition{
 			"addresses":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
 			"allergens":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
@@ -77,9 +77,10 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 			"user":             {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
 			"users":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
 		},
-		AutoDiscoverEnabled:   true,
+		AutoDiscoverThreshold: 25,
 		AutoDiscoverWhiteList: []string{"bar"},
-	})
+	}
+	callback := NewHasIDAtSecondLevelCallback(idConfig)
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
@@ -91,23 +92,27 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	firstSectionFoo := "foo"
 	firstSectionBar := "bar"
 
-	for i := 0; i < maxUniqueMetrics-1; i++ {
+	uItoA := func(i uint) string {
+		return strconv.FormatUint(uint64(i), 10)
+	}
+
+	for i := uint(0); i < idConfig.AutoDiscoverThreshold-1; i++ {
 		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
-		assert.Equal(t, MetricOperation{"get", firstSectionFoo, strconv.Itoa(i)}, BuildHTTPRequestMetricOperation(rFoo, callback))
+		assert.Equal(t, MetricOperation{"get", firstSectionFoo, uItoA(i)}, BuildHTTPRequestMetricOperation(rFoo, callback))
 
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
-		assert.Equal(t, MetricOperation{"get", firstSectionBar, strconv.Itoa(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
+		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
 	}
 	assert.Equal(t, 0, len(hook.Entries))
 
-	for i := maxUniqueMetrics; i < maxUniqueMetrics+maxUniqueMetrics; i++ {
+	for i := idConfig.AutoDiscoverThreshold; i < idConfig.AutoDiscoverThreshold+idConfig.AutoDiscoverThreshold; i++ {
 		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
 		assert.Equal(t, MetricOperation{"get", firstSectionFoo, MetricIDPlaceholder}, BuildHTTPRequestMetricOperation(rFoo, callback))
 
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
-		assert.Equal(t, MetricOperation{"get", firstSectionBar, strconv.Itoa(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
+		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
 	}
-	assert.Equal(t, maxUniqueMetrics, len(hook.Entries))
+	assert.Equal(t, idConfig.AutoDiscoverThreshold, uint(len(hook.Entries)))
 	assert.Equal(t, log.ErrorLevel, hook.LastEntry().Level)
 	assert.Equal(t, logSuspiciousMetric, hook.LastEntry().Message)
 	assert.Equal(t, log.Fields{"operation": MetricOperation{"get", "foo", "49"}}, hook.LastEntry().Data)

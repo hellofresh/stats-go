@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -26,7 +27,7 @@ func Test_sectionsTestRegistry(t *testing.T) {
 
 func parseAndAssertParseResults(t *testing.T, s string) {
 	m, err := ParseSectionsTestsMap(s)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, reflect.ValueOf(m).MapKeys())
 
 	callback, ok := m["foo"]
@@ -78,4 +79,11 @@ func TestRegisterSectionTest_ErrUnknownSectionTest(t *testing.T) {
 
 	_, err = ParseSectionsTestsMap("foo:true:baz:NOT_EISTS")
 	assert.Equal(t, err, ErrUnknownSectionTest)
+}
+
+func TestSectionsTestsMap_String(t *testing.T) {
+	m, err := ParseSectionsTestsMap("foo:true:bar:numeric:baz:not_empty")
+	require.NoError(t, err)
+
+	assert.Equal(t, "[foo: true, bar: numeric, baz: not_empty]", m.String())
 }

@@ -1,24 +1,23 @@
 package bucket
 
-const maxUniqueMetrics = 25
-
 type metricStorage struct {
-	metrics map[string]map[string]uint
+	threshold uint
+	metrics   map[string]map[string]uint
 }
 
-func newMetricStorage() *metricStorage {
-	return &metricStorage{metrics: make(map[string]map[string]uint)}
+func newMetricStorage(threshold uint) *metricStorage {
+	return &metricStorage{threshold: threshold, metrics: make(map[string]map[string]uint)}
 }
 
 func (s *metricStorage) LooksLikeID(firstSection, secondSection string) bool {
 	if _, ok := s.metrics[firstSection]; !ok {
-		s.metrics[firstSection] = make(map[string]uint, maxUniqueMetrics)
+		s.metrics[firstSection] = make(map[string]uint, s.threshold)
 	}
 
 	// avoid storing all values to avoid memory loss
-	if len(s.metrics[firstSection]) < maxUniqueMetrics {
+	if uint(len(s.metrics[firstSection])) < s.threshold {
 		s.metrics[firstSection][secondSection]++
 	}
 
-	return len(s.metrics[firstSection]) >= maxUniqueMetrics
+	return uint(len(s.metrics[firstSection])) >= s.threshold
 }

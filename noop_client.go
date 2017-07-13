@@ -44,6 +44,16 @@ func (c *NoopClient) TrackOperationN(section string, operation bucket.MetricOper
 	return c
 }
 
+// TrackMetric tracks custom metric, w/out ok/fail additional sections
+func (c *NoopClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
+	return c
+}
+
+// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
+func (c *NoopClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+	return c
+}
+
 // TrackState tracks metric absolute value
 func (c *NoopClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
 	return c

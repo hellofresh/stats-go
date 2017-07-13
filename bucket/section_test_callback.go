@@ -4,20 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
-	sectionsDelimiter = ":"
+	sectionsDelimiter   = ":"
+	logSuspiciousMetric = "Second level ID auto-discover found suspicious metric"
 
 	// SectionTestTrue is a name for "stats.TestAlwaysTrue" test callback function
 	SectionTestTrue = "true"
-
 	// SectionTestIsNumeric is a name for "stats.TestIsNumeric" test callback function
 	SectionTestIsNumeric = "numeric"
-
 	// SectionTestIsNotEmpty is a name for "stats.TestIsNotEmpty" test callback function
 	SectionTestIsNotEmpty = "not_empty"
 )
@@ -52,6 +54,7 @@ func (m SectionsTestsMap) String() string {
 		sections = append(sections, fmt.Sprintf("%s: %s", k, v.Name))
 	}
 
+	sort.Strings(sections)
 	return fmt.Sprintf("[%s]", strings.Join(sections, ", "))
 }
 
@@ -80,9 +83,29 @@ var (
 	}
 )
 
+// SecondLevelIDConfig configuration struct for second level ID callback
+type SecondLevelIDConfig struct {
+	HasIDAtSecondLevel    SectionsTestsMap
+	AutoDiscoverThreshold uint
+	AutoDiscoverWhiteList []string
+
+	autoDiscoverStorage  *metricStorage
+	autoDiscoverWhiteMap map[string]bool
+}
+
 // NewHasIDAtSecondLevelCallback returns HttpMetricNameAlterCallback implementation that checks for IDs
 // on the second level of HTTP Request path
-func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HTTPMetricNameAlterCallback {
+func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAlterCallback {
+	if config.AutoDiscoverThreshold > 0 {
+		config.autoDiscoverStorage = newMetricStorage(config.AutoDiscoverThreshold)
+
+		// convert array to map for easier search
+		config.autoDiscoverWhiteMap = make(map[string]bool, len(config.AutoDiscoverWhiteList))
+		for _, val := range config.AutoDiscoverWhiteList {
+			config.autoDiscoverWhiteMap[val] = true
+		}
+	}
+
 	return func(operation MetricOperation, r *http.Request) MetricOperation {
 		firstFragment := "/"
 		for _, fragment := range strings.Split(r.URL.Path, "/") {
@@ -91,9 +114,18 @@ func NewHasIDAtSecondLevelCallback(hasIDAtSecondLevel SectionsTestsMap) HTTPMetr
 				break
 			}
 		}
-		if testFunction, ok := hasIDAtSecondLevel[PathSection(firstFragment)]; ok {
+
+		if testFunction, ok := config.HasIDAtSecondLevel[PathSection(firstFragment)]; ok {
 			if testFunction.Callback(PathSection(operation[2])) {
 				operation[2] = MetricIDPlaceholder
+			}
+		} else if config.AutoDiscoverThreshold > 0 {
+			if _, ok := config.autoDiscoverWhiteMap[firstFragment]; !ok {
+				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation[2]) {
+					log.WithField("operation", operation).Error("Second level ID auto-discover found suspicious metric")
+
+					operation[2] = MetricIDPlaceholder
+				}
 			}
 		}
 

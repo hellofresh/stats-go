@@ -1,10 +1,14 @@
 package bucket
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,33 +54,68 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		{"GET", "/clients/qwe123", MetricOperation{"get", "clients", MetricIDPlaceholder}},
 	}
 
-	callback := NewHasIDAtSecondLevelCallback(map[PathSection]SectionTestDefinition{
-		"addresses":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"allergens":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"boxes":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"clients":          {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
-		"coupons":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"cuisines":         {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"customers":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"delivery_options": {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"favorites":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"freebies":         {SectionTestIsNumeric, GetSectionTestCallback(SectionTestIsNumeric)},
-		"ingredients":      {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"menus":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"product_families": {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"products":         {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"ratings":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"recipes":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"recipients":       {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"subscriptions":    {SectionTestIsNumeric, GetSectionTestCallback(SectionTestIsNumeric)},
-		"user":             {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-		"users":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
-	})
+	idConfig := &SecondLevelIDConfig{
+		HasIDAtSecondLevel: map[PathSection]SectionTestDefinition{
+			"addresses":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"allergens":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"boxes":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"clients":          {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
+			"coupons":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"cuisines":         {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"customers":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"delivery_options": {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"favorites":        {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"freebies":         {SectionTestIsNumeric, GetSectionTestCallback(SectionTestIsNumeric)},
+			"ingredients":      {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"menus":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"product_families": {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"products":         {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"ratings":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"recipes":          {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"recipients":       {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"subscriptions":    {SectionTestIsNumeric, GetSectionTestCallback(SectionTestIsNumeric)},
+			"user":             {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+			"users":            {SectionTestTrue, GetSectionTestCallback(SectionTestTrue)},
+		},
+		AutoDiscoverThreshold: 25,
+		AutoDiscoverWhiteList: []string{"bar"},
+	}
+	callback := NewHasIDAtSecondLevelCallback(idConfig)
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
 		assert.Equal(t, data.Operations, BuildHTTPRequestMetricOperation(r, callback))
 	}
+
+	hook := test.NewGlobal()
+
+	firstSectionFoo := "foo"
+	firstSectionBar := "bar"
+
+	uItoA := func(i uint) string {
+		return strconv.FormatUint(uint64(i), 10)
+	}
+
+	for i := uint(0); i < idConfig.AutoDiscoverThreshold-1; i++ {
+		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
+		assert.Equal(t, MetricOperation{"get", firstSectionFoo, uItoA(i)}, BuildHTTPRequestMetricOperation(rFoo, callback))
+
+		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
+		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
+	}
+	assert.Equal(t, 0, len(hook.Entries))
+
+	for i := idConfig.AutoDiscoverThreshold; i < idConfig.AutoDiscoverThreshold+idConfig.AutoDiscoverThreshold; i++ {
+		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
+		assert.Equal(t, MetricOperation{"get", firstSectionFoo, MetricIDPlaceholder}, BuildHTTPRequestMetricOperation(rFoo, callback))
+
+		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
+		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
+	}
+	assert.Equal(t, idConfig.AutoDiscoverThreshold, uint(len(hook.Entries)))
+	assert.Equal(t, log.ErrorLevel, hook.LastEntry().Level)
+	assert.Equal(t, logSuspiciousMetric, hook.LastEntry().Message)
+	assert.Equal(t, log.Fields{"operation": MetricOperation{"get", "foo", "49"}}, hook.LastEntry().Data)
 }
 
 func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
@@ -105,10 +144,11 @@ func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 			return metricFragments
 		}
 
-		return NewHasIDAtSecondLevelCallback(map[PathSection]SectionTestDefinition{
-			"users":   {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
-			"clients": {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
-		})(metricFragments, r)
+		return NewHasIDAtSecondLevelCallback(&SecondLevelIDConfig{
+			HasIDAtSecondLevel: map[PathSection]SectionTestDefinition{
+				"users":   {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
+				"clients": {SectionTestIsNotEmpty, GetSectionTestCallback(SectionTestIsNotEmpty)},
+			}})(metricFragments, r)
 	}
 
 	for _, data := range dataProvider {

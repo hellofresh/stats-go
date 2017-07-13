@@ -2,7 +2,6 @@ package stats
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -39,6 +38,11 @@ type Client interface {
 	// TrackOperationN tracks custom operation with n diff
 	TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client
 
+	// TrackMetric tracks custom metric, w/out ok/fail additional sections
+	TrackMetric(section string, operation bucket.MetricOperation) Client
+	// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
+	TrackMetricN(section string, operation bucket.MetricOperation, n int) Client
+
 	// TrackState tracks metric absolute value
 	TrackState(section string, operation bucket.MetricOperation, value int) Client
 
@@ -55,19 +59,9 @@ type Client interface {
 
 // NewClient creates and builds new stats client instance by given dsn
 func NewClient(dsn, prefix string) (Client, error) {
-	// for backward compatibility
-	if dsn == "" {
-		return NewStatsdClient(dsn, prefix), nil
-	}
-
 	dsnURL, err := url.Parse(dsn)
 	if err != nil {
 		return nil, err
-	}
-
-	// backward compatibility statsd dsn - "<statsd.host>:<port>"
-	if fmt.Sprintf("%s:%s", dsnURL.Scheme, dsnURL.Opaque) == dsn {
-		return NewStatsdClient(dsn, prefix), nil
 	}
 
 	switch dsnURL.Scheme {

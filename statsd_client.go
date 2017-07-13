@@ -9,7 +9,7 @@ import (
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 	log "github.com/sirupsen/logrus"
-	statsd "gopkg.in/alexcesaro/statsd.v2"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 // StatsdClient is Client implementation for statsd
@@ -98,6 +98,28 @@ func (c *StatsdClient) TrackOperationN(section string, operation bucket.MetricOp
 		t.Finish(b.MetricWithSuffix())
 	}
 	i.IncrementAllN(b, n)
+
+	return c
+}
+
+// TrackMetric tracks custom metric, w/out ok/fail additional sections
+func (c *StatsdClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
+	b := bucket.NewPlain(section, operation, true)
+	i := incrementer.New(c.client, c.muted)
+
+	i.Increment(b.Metric())
+	i.Increment(b.MetricTotal())
+
+	return c
+}
+
+// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
+func (c *StatsdClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+	b := bucket.NewPlain(section, operation, true)
+	i := incrementer.New(c.client, c.muted)
+
+	i.IncrementN(b.Metric(), n)
+	i.IncrementN(b.MetricTotal(), n)
 
 	return c
 }

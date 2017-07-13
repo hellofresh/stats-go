@@ -7,7 +7,7 @@
 # hellofresh/stats-go
 
 [![Build Status](https://travis-ci.org/hellofresh/stats-go.svg?branch=master)](https://travis-ci.org/hellofresh/stats-go)
-[![Coverage Status](https://coveralls.io/repos/github/hellofresh/stats-go/badge.svg?branch=master)](https://coveralls.io/github/hellofresh/stats-go?branch=master)
+[![Coverage Status](https://codecov.io/gh/hellofresh/stats-go/branch/master/graph/badge.svg)](https://codecov.io/gh/hellofresh/stats-go)
 [![GoDoc](https://godoc.org/github.com/hellofresh/stats-go?status.svg)](https://godoc.org/github.com/hellofresh/stats-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/stats-go)](https://goreportcard.com/report/github.com/hellofresh/stats-go)
 
@@ -26,6 +26,7 @@ dashboards to track activity and problems.
 * Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
 * Easy to build HTTP requests metrics - timing and count
 * Generalise or modify HTTP Requests metric - e.g. skip ID part
+* Hook for [`logrus`](https://github.com/sirupsen/logrus) to monitor application error logs
 
 ## Installation
 
@@ -63,16 +64,6 @@ func main() {
         noopClient, _ := stats.NewClient("noop://", "")
         defer noopClient.Close()
 
-        // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        // format for backward compatibility with previous version
-        legacyStatsdClient, _ := stats.NewClient("statsd-host:8125", "my.app.prefix")
-        defer legacyStatsdClient.Close()
-
-        // debug log backend for stats
-        // format for backward compatibility with previous version
-        legacyLogClient, _ := stats.NewClient("", "")
-        defer legacyLogClient.Close()
-
         // get settings from env to determine backend and prefix
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
         defer statsClient.Close()
@@ -85,9 +76,11 @@ func main() {
 import "github.com/hellofresh/stats-go/bucket"
 
 timing := statsClient.BuildTimer().Start()
-operations := bucket.MetricOperation{"orders", "order", "create"}
+operation := bucket.MetricOperation{"orders", "order", "create"}
 err := orderService.Create(...)
-statsClient.TrackOperation("ordering", operations, timing, err == nil)
+statsClient.TrackOperation("ordering", operation, timing, err == nil)
+
+statsClient.TrackMetric("requests", operation)
 
 ordersInLast24h := orderService.Count(time.Duration(24)*time.Hour)
 statsClient.TrackState("ordering", operations, ordersInLast24h)
@@ -147,6 +140,37 @@ func main() {
         })
 
         router.Run(":8080")
+}
+```
+
+#### Usage for error logs monitoring
+
+```go
+package foo
+
+import (
+        "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/hooks"
+        log "github.com/sirupsen/logrus"
+)
+
+const sectionErrors = "errors"
+
+func initErrorsMonitoring(statsClient stats.Client) {
+        hook := hooks.NewLogrusHook(statsClient, sectionErrors)
+        log.AddHook(hook)
+
+        // will not produce any metrics
+        log.Debug("debug")
+        log.Info("info")
+        log.Warn("warn")
+
+        // will produce metrics:
+        // <section>.<level>.-.-
+        // total.<section>
+        log.Error("error")
+        log.Panic("panic")
+        log.Falat("fatal")
 }
 ```
 
@@ -248,7 +272,11 @@ func main() {
                 sectionsTestsMap = map[bucket.PathSection]bucket.SectionTestDefinition{}
         }
         statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
-        statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+        statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
+                HasIDAtSecondLevel:    sectionsTestsMap,
+                AutoDiscoverThreshold: 25,
+                AutoDiscoverWhiteList: []string{"products"},
+        }))
         defer statsClient.Close()
 
         router := gin.Default()
@@ -265,6 +293,15 @@ func main() {
         router.GET("/clients/:id", func(c *gin.Context) {
                 // will produce "<prefix>.get.clients.-id-" metric
                 c.JSON(http.StatusOK, "Get the client ID " + c.Params.ByName("id"))
+        })
+        router.GET("/ingredients/:id", func(c *gin.Context) {
+                // will produce "<prefix>.get.ingredients.<id>" metric for the first AutoDiscoverThreshold requests
+                // and then will produce "<prefix>.get.ingredients.-id-" metric for the rest of requests
+                c.JSON(http.StatusOK, "Get the ingredient ID " + c.Params.ByName("id"))
+        })
+        router.GET("/products/:id", func(c *gin.Context) {
+                // will produce "<prefix>.get.products.<id>" metric
+                c.JSON(http.StatusOK, "Get the product ID " + c.Params.ByName("id"))
         })
 
         router.Run(":8080")

@@ -105,6 +105,34 @@ func (c *MemoryClient) TrackOperationN(section string, operation bucket.MetricOp
 	return c
 }
 
+// TrackMetric tracks custom metric, w/out ok/fail additional sections
+func (c *MemoryClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
+	b := bucket.NewPlain(section, operation, true)
+	i := incrementer.NewMemory()
+
+	i.Increment(b.Metric())
+	i.Increment(b.MetricTotal())
+	for metric, value := range i.Metrics() {
+		c.CountMetrics[metric] += value
+	}
+
+	return c
+}
+
+// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
+func (c *MemoryClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+	b := bucket.NewPlain(section, operation, true)
+	i := incrementer.NewMemory()
+
+	i.IncrementN(b.Metric(), n)
+	i.IncrementN(b.MetricTotal(), n)
+	for metric, value := range i.Metrics() {
+		c.CountMetrics[metric] += value
+	}
+
+	return c
+}
+
 // TrackState tracks metric absolute value
 func (c *MemoryClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
 	b := bucket.NewPlain(section, operation, true)

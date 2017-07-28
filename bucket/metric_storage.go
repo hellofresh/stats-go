@@ -1,6 +1,10 @@
 package bucket
 
+import "sync"
+
 type metricStorage struct {
+	sync.Mutex
+
 	threshold uint
 	metrics   map[string]map[string]uint
 }
@@ -10,6 +14,9 @@ func newMetricStorage(threshold uint) *metricStorage {
 }
 
 func (s *metricStorage) LooksLikeID(firstSection, secondSection string) bool {
+	s.Lock()
+	defer s.Unlock()
+
 	if _, ok := s.metrics[firstSection]; !ok {
 		s.metrics[firstSection] = make(map[string]uint, s.threshold)
 	}

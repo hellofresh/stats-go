@@ -115,7 +115,12 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	assert.Equal(t, idConfig.AutoDiscoverThreshold, uint(len(hook.Entries)))
 	assert.Equal(t, log.ErrorLevel, hook.LastEntry().Level)
 	assert.Equal(t, logSuspiciousMetric, hook.LastEntry().Message)
-	assert.Equal(t, log.Fields{"operation": MetricOperation{"get", "foo", "49"}}, hook.LastEntry().Data)
+	assert.Equal(t, log.Fields{
+		"method":         "GET",
+		"path":           "/foo/49",
+		"first_fragment": "foo",
+		"operation":      MetricOperation{"get", "foo", "49"},
+	}, hook.LastEntry().Data)
 }
 
 func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {

@@ -122,7 +122,12 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 		} else if config.AutoDiscoverThreshold > 0 {
 			if _, ok := config.autoDiscoverWhiteMap[firstFragment]; !ok {
 				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation[2]) {
-					log.WithField("operation", operation).Error("Second level ID auto-discover found suspicious metric")
+					log.WithFields(log.Fields{
+						"method":         r.Method,
+						"path":           r.URL.Path,
+						"first_fragment": firstFragment,
+						"operation":      operation,
+					}).Error("Second level ID auto-discover found suspicious metric")
 
 					operation[2] = MetricIDPlaceholder
 				}

@@ -15,10 +15,10 @@ IGNORED_PACKAGES := /vendor/
 all: deps test lint
 
 deps:
-	@echo "$(OK_COLOR)==> Installing glide dependencies$(NO_COLOR)"
-	@go get -u github.com/Masterminds/glide
+	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
+	@go get -u github.com/golang/dep/cmd/dep
 	@go get -u github.com/golang/lint/golint
-	@glide install
+	@dep ensure
 
 test:
 	@/bin/sh -c "./build/test.sh $(allpackages)"

@@ -15,6 +15,7 @@ type MemoryClient struct {
 	sync.Mutex
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 	httpRequestSection string
+	unicode            bool
 
 	TimerMetrics []timer.Metric
 	CountMetrics map[string]int
@@ -22,8 +23,8 @@ type MemoryClient struct {
 }
 
 // NewMemoryClient builds and returns new MemoryClient instance
-func NewMemoryClient() *MemoryClient {
-	client := &MemoryClient{}
+func NewMemoryClient(unicode bool) *MemoryClient {
+	client := &MemoryClient{unicode: unicode}
 	client.ResetHTTPRequestSection()
 	client.resetMetrics()
 
@@ -49,7 +50,7 @@ func (c *MemoryClient) Close() error {
 
 // TrackRequest tracks HTTP Request stats
 func (c *MemoryClient) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
-	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback)
+	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	i := incrementer.NewMemory()
 
 	t.Finish(b.Metric())
@@ -67,7 +68,7 @@ func (c *MemoryClient) TrackRequest(r *http.Request, t timer.Timer, success bool
 
 // TrackOperation tracks custom operation
 func (c *MemoryClient) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
-	b := bucket.NewPlain(section, operation, success)
+	b := bucket.NewPlain(section, operation, success, true)
 	i := incrementer.NewMemory()
 
 	if nil != t {
@@ -87,7 +88,7 @@ func (c *MemoryClient) TrackOperation(section string, operation bucket.MetricOpe
 
 // TrackOperationN tracks custom operation with n diff
 func (c *MemoryClient) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
-	b := bucket.NewPlain(section, operation, success)
+	b := bucket.NewPlain(section, operation, success, true)
 	i := incrementer.NewMemory()
 
 	if nil != t {
@@ -107,7 +108,7 @@ func (c *MemoryClient) TrackOperationN(section string, operation bucket.MetricOp
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
 func (c *MemoryClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, true)
 	i := incrementer.NewMemory()
 
 	i.Increment(b.Metric())
@@ -121,7 +122,7 @@ func (c *MemoryClient) TrackMetric(section string, operation bucket.MetricOperat
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
 func (c *MemoryClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, true)
 	i := incrementer.NewMemory()
 
 	i.IncrementN(b.Metric(), n)
@@ -135,7 +136,7 @@ func (c *MemoryClient) TrackMetricN(section string, operation bucket.MetricOpera
 
 // TrackState tracks metric absolute value
 func (c *MemoryClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, true)
 	s := state.NewMemory()
 
 	s.Set(b.Metric(), value)

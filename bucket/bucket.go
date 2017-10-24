@@ -23,6 +23,8 @@ const (
 	MetricIDPlaceholder = "-id-"
 )
 
+var operationsStatus = map[bool]string{true: suffixStatusOk, false: suffixStatusFail}
+
 // Bucket is an interface for building metric names for operations
 type Bucket interface {
 	// Metric builds simple metric name in the form "<section>.<operation-0>.<operation-1>.<operation-2>"
@@ -39,15 +41,16 @@ type Bucket interface {
 }
 
 // SanitizeMetricName modifies metric name to work well with statsd
-func SanitizeMetricName(metric string) string {
+func SanitizeMetricName(metric string, uniDecode bool) string {
 	if metric == "" {
 		return MetricEmptyPlaceholder
 	}
 
-	// convert unicode symbols to ASCII
-	asciiMetric := unidecode.Unidecode(metric)
-	if asciiMetric != metric {
-		metric = prefixUnicode + asciiMetric
+	if uniDecode {
+		asciiMetric := unidecode.Unidecode(metric)
+		if asciiMetric != metric {
+			metric = prefixUnicode + asciiMetric
+		}
 	}
 
 	return strings.Replace(
@@ -58,8 +61,4 @@ func SanitizeMetricName(metric string) string {
 		"_",
 		-1,
 	)
-}
-
-func getOperationStatus(success bool) string {
-	return map[bool]string{true: suffixStatusOk, false: suffixStatusFail}[success]
 }

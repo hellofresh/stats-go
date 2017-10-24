@@ -21,8 +21,50 @@ func TestPlain_Metric(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success, true)
 		assert.Equal(t, data.Metric, b.Metric())
+	}
+}
+
+func BenchmarkNewPlain(b *testing.B) {
+	operation := MetricOperation{"bar", "baz", "qaz"}
+	for n := 0; n < b.N; n++ {
+		NewPlain("foo", operation, true, false)
+	}
+}
+
+func BenchmarkNewPlain_unicode(b *testing.B) {
+	operation := MetricOperation{"bar", "baz", "qaz"}
+	for n := 0; n < b.N; n++ {
+		NewPlain("foo", operation, true, true)
+	}
+}
+
+func BenchmarkPlain_Metric(b *testing.B) {
+	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	for n := 0; n < b.N; n++ {
+		bucket.Metric()
+	}
+}
+
+func BenchmarkPlain_MetricWithSuffix(b *testing.B) {
+	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	for n := 0; n < b.N; n++ {
+		bucket.MetricWithSuffix()
+	}
+}
+
+func BenchmarkPlain_MetricTotal(b *testing.B) {
+	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	for n := 0; n < b.N; n++ {
+		bucket.MetricTotal()
+	}
+}
+
+func BenchmarkPlain_MetricTotalWithSuffix(b *testing.B) {
+	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	for n := 0; n < b.N; n++ {
+		bucket.MetricTotalWithSuffix()
 	}
 }
 
@@ -38,7 +80,7 @@ func TestPlain_MetricWithSuffix(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success, true)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
@@ -55,7 +97,7 @@ func TestPlain_MetricTotal(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success, true)
 		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
@@ -72,7 +114,7 @@ func TestPlain_MetricTotalWithSuffix(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		b := NewPlain(data.Section, data.Operation, data.Success)
+		b := NewPlain(data.Section, data.Operation, data.Success, true)
 		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }

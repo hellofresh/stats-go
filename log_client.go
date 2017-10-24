@@ -6,8 +6,8 @@ type LogClient struct {
 }
 
 // NewLogClient builds and returns new LogClient instance
-func NewLogClient() *LogClient {
-	client := &LogClient{&StatsdClient{muted: true}}
+func NewLogClient(unicode bool) *LogClient {
+	client := &LogClient{&StatsdClient{muted: true, unicode: unicode}}
 	client.ResetHTTPRequestSection()
 
 	return client

@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewLogClient_SetHTTPMetricCallback(t *testing.T) {
-	client := NewLogClient()
+	client := NewLogClient(true)
 	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
 		return metricParts
 	}

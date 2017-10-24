@@ -38,18 +38,26 @@ go get -u github.com/hellofresh/stats-go
 
 #### Instance creation
 
+Connection DSN has the following format: `<type>://<connection params>/<connection path>?<connection options>`.
+
+* `<type>` - one of supported backends: `log`, `statsd`, `memory`, `noop`
+* `<connection params>` - used for `statsd` backend only, to defining host and port
+* `<connection path>` - used for `statsd` backend only, to define prefix/namespace
+* `<connection options>` - teh following options are available in the query string format: 
+  * `unicode` - convert unicode metrics to ASCII, default value is `false` as it takes significant memory allocation number
+
 ```go
 package main
 
 import (
         "os"
 
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
 )
 
 func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        statsdClient, _ := stats.NewClient("statsd://statsd-host:8125/?prefix=my.app.prefix")
+        statsdClient, _ := stats.NewClient("statsd://statsd-host:8125/my.app.prefix?unicode=true")
         defer statsdClient.Close()
 
         // debug log backend for stats

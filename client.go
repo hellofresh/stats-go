@@ -4,6 +4,9 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"strconv"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/timer"
@@ -64,15 +67,18 @@ func NewClient(dsn string) (Client, error) {
 		return nil, err
 	}
 
+	// do not care about parse error, as default value is set to false that is fine for us
+	unicode, _ := strconv.ParseBool(dsnURL.Query().Get("unicode"))
+
 	switch dsnURL.Scheme {
 	case StatsD:
-		return NewStatsdClient(dsnURL.Host, dsnURL.Query().Get("prefix")), nil
+		return NewStatsdClient(dsnURL.Host, strings.Trim(dsnURL.Path, "/"), unicode), nil
 	case Log:
-		return NewLogClient(), nil
+		return NewLogClient(unicode), nil
 	case Memory:
-		return NewMemoryClient(), nil
+		return NewMemoryClient(unicode), nil
 	case Noop:
-		return NewNoopClient(), nil
+		return NewNoopClient(unicode), nil
 	}
 
 	return nil, ErrUnknownClient

@@ -11,12 +11,14 @@ import (
 // NoopClient is Client implementation that does literally nothing
 type NoopClient struct {
 	sync.Mutex
+
+	unicode            bool
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 }
 
 // NewNoopClient builds and returns new NoopClient instance
-func NewNoopClient() *NoopClient {
-	return &NoopClient{}
+func NewNoopClient(unicode bool) *NoopClient {
+	return &NoopClient{unicode: unicode}
 }
 
 // BuildTimer builds timer to track metric timings

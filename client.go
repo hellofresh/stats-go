@@ -21,7 +21,7 @@ const (
 )
 
 // ErrUnknownClient is an error returned when trying to create stats client of unknown type
-var ErrUnknownClient = errors.New("Unknown stats client type")
+var ErrUnknownClient = errors.New("unknown stats client type")
 
 // Client is an interface for different methods of gathering stats
 type Client interface {
@@ -58,7 +58,7 @@ type Client interface {
 }
 
 // NewClient creates and builds new stats client instance by given dsn
-func NewClient(dsn, prefix string) (Client, error) {
+func NewClient(dsn string) (Client, error) {
 	dsnURL, err := url.Parse(dsn)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func NewClient(dsn, prefix string) (Client, error) {
 
 	switch dsnURL.Scheme {
 	case StatsD:
-		return NewStatsdClient(dsnURL.Host, prefix), nil
+		return NewStatsdClient(dsnURL.Host, dsnURL.Query().Get("prefix")), nil
 	case Log:
 		return NewLogClient(), nil
 	case Memory:

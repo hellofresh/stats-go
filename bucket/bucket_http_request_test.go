@@ -203,6 +203,47 @@ func TestHttpRequest_MetricWithSuffix(t *testing.T) {
 	}
 }
 
+func BenchmarkHttpRequest_MetricWithSuffix(b *testing.B) {
+	dataProvider := []struct {
+		Method  string
+		Path    string
+		Success bool
+		Metric  string
+	}{
+		{"GET", "/foo/bar/baz", true, "request-ok.get.foo.bar"},
+		{"GET", "/foo/bar/baz", false, "request-fail.get.foo.bar"},
+	}
+
+	for _, data := range dataProvider {
+		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
+		for n := 0; n < b.N; n++ {
+			b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+			b.MetricWithSuffix()
+		}
+	}
+}
+
+func BenchmarkHttpRequest_MetricTotal(b *testing.B) {
+	dataProvider := []struct {
+		Method  string
+		Path    string
+		Success bool
+		Metric  string
+	}{
+		{"GET", "/foo/bar/baz", true, "total.request"},
+		{"GET", "/foo/bar/baz", false, "total.request"},
+	}
+
+	for _, data := range dataProvider {
+		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
+		for n := 0; n < b.N; n++ {
+			b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+			b.MetricTotal()
+		}
+
+	}
+}
+
 func TestHttpRequest_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Method  string

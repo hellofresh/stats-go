@@ -4,9 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"strings"
-
 	"strconv"
+	"strings"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/timer"

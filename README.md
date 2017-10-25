@@ -43,7 +43,7 @@ Connection DSN has the following format: `<type>://<connection params>/<connecti
 * `<type>` - one of supported backends: `log`, `statsd`, `memory`, `noop`
 * `<connection params>` - used for `statsd` backend only, to defining host and port
 * `<connection path>` - used for `statsd` backend only, to define prefix/namespace
-* `<connection options>` - teh following options are available in the query string format: 
+* `<connection options>` - the following options are available in the query string format:
   * `unicode` - convert unicode metrics to ASCII, default value is `false` as it takes significant memory allocation number
 
 ```go

@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -88,6 +89,7 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	}
 
 	hook := test.NewGlobal()
+	log.SetOutput(ioutil.Discard)
 
 	firstSectionFoo := "foo"
 	firstSectionBar := "bar"
@@ -180,7 +182,7 @@ func TestHttpRequest_Metric(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
@@ -198,49 +200,22 @@ func TestHttpRequest_MetricWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }
 
-func BenchmarkHttpRequest_MetricWithSuffix(b *testing.B) {
-	dataProvider := []struct {
-		Method  string
-		Path    string
-		Success bool
-		Metric  string
-	}{
-		{"GET", "/foo/bar/baz", true, "request-ok.get.foo.bar"},
-		{"GET", "/foo/bar/baz", false, "request-fail.get.foo.bar"},
-	}
-
-	for _, data := range dataProvider {
-		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		for n := 0; n < b.N; n++ {
-			b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
-			b.MetricWithSuffix()
-		}
+func BenchmarkNewHTTPRequest(b *testing.B) {
+	r := &http.Request{Method: "GET", URL: &url.URL{Path: "/foo/bar/baz"}}
+	for n := 0; n < b.N; n++ {
+		NewHTTPRequest(SectionRequest, r, true, nil, false)
 	}
 }
 
-func BenchmarkHttpRequest_MetricTotal(b *testing.B) {
-	dataProvider := []struct {
-		Method  string
-		Path    string
-		Success bool
-		Metric  string
-	}{
-		{"GET", "/foo/bar/baz", true, "total.request"},
-		{"GET", "/foo/bar/baz", false, "total.request"},
-	}
-
-	for _, data := range dataProvider {
-		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		for n := 0; n < b.N; n++ {
-			b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
-			b.MetricTotal()
-		}
-
+func BenchmarkNewHTTPRequest_unicode(b *testing.B) {
+	r := &http.Request{Method: "GET", URL: &url.URL{Path: "/foo/bar/baz"}}
+	for n := 0; n < b.N; n++ {
+		NewHTTPRequest(SectionRequest, r, true, nil, true)
 	}
 }
 
@@ -257,7 +232,7 @@ func TestHttpRequest_MetricTotal(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.MetricTotal())
 	}
 }
@@ -275,7 +250,7 @@ func TestHttpRequest_TMetricTotalWithSuffix(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(SectionRequest, r, data.Success, nil)
+		b := NewHTTPRequest(SectionRequest, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.MetricTotalWithSuffix())
 	}
 }
@@ -294,7 +269,7 @@ func TestHttpRequest_Metric_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(section, r, data.Success, nil)
+		b := NewHTTPRequest(section, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.Metric())
 	}
 }
@@ -313,7 +288,7 @@ func TestHttpRequest_MetricWithSuffix_customSection(t *testing.T) {
 
 	for _, data := range dataProvider {
 		r := &http.Request{Method: data.Method, URL: &url.URL{Path: data.Path}}
-		b := NewHTTPRequest(section, r, data.Success, nil)
+		b := NewHTTPRequest(section, r, data.Success, nil, true)
 		assert.Equal(t, data.Metric, b.MetricWithSuffix())
 	}
 }

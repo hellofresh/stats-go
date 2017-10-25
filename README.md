@@ -38,34 +38,42 @@ go get -u github.com/hellofresh/stats-go
 
 #### Instance creation
 
+Connection DSN has the following format: `<type>://<connection params>/<connection path>?<connection options>`.
+
+* `<type>` - one of supported backends: `log`, `statsd`, `memory`, `noop`
+* `<connection params>` - used for `statsd` backend only, to defining host and port
+* `<connection path>` - used for `statsd` backend only, to define prefix/namespace
+* `<connection options>` - the following options are available in the query string format:
+  * `unicode` - convert unicode metrics to ASCII, default value is `false` as it takes significant memory allocation number
+
 ```go
 package main
 
 import (
         "os"
 
-        stats "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go"
 )
 
 func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
-        statsdClient, _ := stats.NewClient("statsd://statsd-host:8125", "my.app.prefix")
+        statsdClient, _ := stats.NewClient("statsd://statsd-host:8125/my.app.prefix?unicode=true")
         defer statsdClient.Close()
 
         // debug log backend for stats
-        logClient, _ := stats.NewClient("log://", "")
+        logClient, _ := stats.NewClient("log://")
         defer logClient.Close()
 
         // memory backend to track operations in unit tests
-        memoryClient, _ := stats.NewClient("memory://", "")
+        memoryClient, _ := stats.NewClient("memory://")
         defer memoryClient.Close()
 
         // noop backend to ignore all stats
-        noopClient, _ := stats.NewClient("noop://", "")
+        noopClient, _ := stats.NewClient("noop://")
         defer noopClient.Close()
 
         // get settings from env to determine backend and prefix
-        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"))
         defer statsClient.Close()
 }
 ```
@@ -208,7 +216,7 @@ import (
 )
 
 func TestDoSomeJob(t *testing.T) {
-        statsClient, _ := stats.NewClient("memory://", "") 
+        statsClient, _ := stats.NewClient("memory://") 
 
         err := DoSomeJob(statsClient)
         assert.Nil(t, err)
@@ -271,7 +279,7 @@ func main() {
         if err != nil {
                 sectionsTestsMap = map[bucket.PathSection]bucket.SectionTestDefinition{}
         }
-        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient, _ := stats.NewClient(os.Getenv("STATS_DSN"))
         statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
                 HasIDAtSecondLevel:    sectionsTestsMap,
                 AutoDiscoverThreshold: 25,

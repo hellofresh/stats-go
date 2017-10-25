@@ -19,10 +19,11 @@ type StatsdClient struct {
 	muted              bool
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 	httpRequestSection string
+	unicode            bool
 }
 
 // NewStatsdClient builds and returns new StatsdClient instance
-func NewStatsdClient(dsn, prefix string) *StatsdClient {
+func NewStatsdClient(dsn, prefix string, unicode bool) *StatsdClient {
 	var options []statsd.Option
 	muted := false
 
@@ -48,7 +49,7 @@ func NewStatsdClient(dsn, prefix string) *StatsdClient {
 		muted = true
 	}
 
-	client := &StatsdClient{client: statsdClient, muted: muted}
+	client := &StatsdClient{client: statsdClient, muted: muted, unicode: unicode}
 	client.ResetHTTPRequestSection()
 
 	return client
@@ -67,7 +68,7 @@ func (c *StatsdClient) Close() error {
 
 // TrackRequest tracks HTTP Request stats
 func (c *StatsdClient) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
-	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback)
+	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	i := incrementer.New(c.client, c.muted)
 
 	t.Finish(b.Metric())
@@ -78,7 +79,7 @@ func (c *StatsdClient) TrackRequest(r *http.Request, t timer.Timer, success bool
 
 // TrackOperation tracks custom operation
 func (c *StatsdClient) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
-	b := bucket.NewPlain(section, operation, success)
+	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := incrementer.New(c.client, c.muted)
 
 	if nil != t {
@@ -91,7 +92,7 @@ func (c *StatsdClient) TrackOperation(section string, operation bucket.MetricOpe
 
 // TrackOperationN tracks custom operation with n diff
 func (c *StatsdClient) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
-	b := bucket.NewPlain(section, operation, success)
+	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := incrementer.New(c.client, c.muted)
 
 	if nil != t {
@@ -104,7 +105,7 @@ func (c *StatsdClient) TrackOperationN(section string, operation bucket.MetricOp
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
 func (c *StatsdClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := incrementer.New(c.client, c.muted)
 
 	i.Increment(b.Metric())
@@ -115,7 +116,7 @@ func (c *StatsdClient) TrackMetric(section string, operation bucket.MetricOperat
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
 func (c *StatsdClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := incrementer.New(c.client, c.muted)
 
 	i.IncrementN(b.Metric(), n)
@@ -126,7 +127,7 @@ func (c *StatsdClient) TrackMetricN(section string, operation bucket.MetricOpera
 
 // TrackState tracks metric absolute value
 func (c *StatsdClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
-	b := bucket.NewPlain(section, operation, true)
+	b := bucket.NewPlain(section, operation, true, c.unicode)
 	s := state.New(c.client, c.muted)
 
 	s.Set(b.Metric(), value)

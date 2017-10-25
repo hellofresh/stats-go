@@ -32,7 +32,7 @@ func TestLog(t *testing.T) {
 
 	hook.Reset()
 
-	bb := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true)
+	bb := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
 	i.IncrementAll(bb)
 
 	assert.Equal(t, 4, len(hook.Entries))

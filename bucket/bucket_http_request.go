@@ -18,14 +18,15 @@ type HTTPMetricNameAlterCallback func(metricParts MetricOperation, r *http.Reque
 // Normally "<section>" is set to "request", but you can use any string value here.
 type HTTPRequest struct {
 	*Plain
+
 	r        *http.Request
 	callback HTTPMetricNameAlterCallback
 }
 
 // NewHTTPRequest builds and returns new HTTPRequest instance
-func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback) *HTTPRequest {
+func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTPMetricNameAlterCallback, unicode bool) *HTTPRequest {
 	operation := BuildHTTPRequestMetricOperation(r, callback)
-	return &HTTPRequest{NewPlain(section, operation, success), r, callback}
+	return &HTTPRequest{NewPlain(section, operation, success, unicode), r, callback}
 }
 
 // BuildHTTPRequestMetricOperation builds metric operation from HTTP request

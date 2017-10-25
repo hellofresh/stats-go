@@ -47,7 +47,7 @@ func (i *mockIncrementer) IncrementAllN(b bucket.Bucket, n int) {
 }
 
 func Test_incrementAll(t *testing.T) {
-	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true)
+	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
 
 	i := &mockIncrementer{}
 	i.IncrementAll(b)
@@ -60,7 +60,7 @@ func Test_incrementAll(t *testing.T) {
 }
 
 func Test_incrementAllN(t *testing.T) {
-	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true)
+	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
 	n := 42
 
 	i := &mockIncrementer{}

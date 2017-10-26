@@ -1,4 +1,4 @@
-package stats
+package client
 
 import (
 	"net/http"
@@ -12,14 +12,14 @@ import (
 )
 
 func TestMemoryClient_BuildTimeTracker(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 	tt := client.BuildTimer()
 	_, ok := tt.(*timer.Memory)
 	assert.True(t, ok)
 }
 
 func TestMemoryClient_TrackRequest(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	tt := client.BuildTimer()
 	r := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: "/hello/memory/test"}}
@@ -44,7 +44,7 @@ func TestMemoryClient_TrackRequest(t *testing.T) {
 }
 
 func TestMemoryClient_TrackOperation(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	tt := client.BuildTimer()
 	section := "test-section"
@@ -70,7 +70,7 @@ func TestMemoryClient_TrackOperation(t *testing.T) {
 }
 
 func TestMemoryClient_TrackOperationN(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	tt := client.BuildTimer()
 	section := "test-section"
@@ -97,7 +97,7 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 }
 
 func TestMemoryClient_TrackMetric(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	section := "test-section"
 	operation := bucket.MetricOperation{"o1", "o2", "o3"}
@@ -120,7 +120,7 @@ func TestMemoryClient_TrackMetric(t *testing.T) {
 }
 
 func TestMemoryClient_TrackMetricN(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	section := "test-section"
 	operation := bucket.MetricOperation{"o1", "o2", "o3"}
@@ -144,7 +144,7 @@ func TestMemoryClient_TrackMetricN(t *testing.T) {
 }
 
 func TestMemoryClient_TrackState(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	section := "test-section"
 	operation1 := bucket.MetricOperation{"o1", "o2", "o3"}
@@ -167,7 +167,7 @@ func TestMemoryClient_TrackState(t *testing.T) {
 }
 
 func TestMemoryClient_SetHTTPMetricCallback(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
 		return metricParts
 	}
@@ -181,7 +181,7 @@ func TestMemoryClient_SetHTTPMetricCallback(t *testing.T) {
 }
 
 func TestMemoryClient_SetHTTPRequestSection(t *testing.T) {
-	client := NewMemoryClient(true)
+	client := NewMemory(true)
 
 	assert.Equal(t, bucket.SectionRequest, client.httpRequestSection)
 

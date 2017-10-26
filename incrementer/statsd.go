@@ -2,30 +2,35 @@ package incrementer
 
 import (
 	"github.com/hellofresh/stats-go/bucket"
-	statsd "gopkg.in/alexcesaro/statsd.v2"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
-// Statsd struct is Incrementer interface implementation that writes all metrics to statsd
-type Statsd struct {
+// StatsD struct is Incrementer interface implementation that writes all metrics to statsd
+type StatsD struct {
 	c *statsd.Client
 }
 
+// NewStatsD creates new statsd incrementer instance
+func NewStatsD(c *statsd.Client) *StatsD {
+	return &StatsD{c: c}
+}
+
 // Increment increments metric in statsd
-func (i *Statsd) Increment(metric string) {
+func (i *StatsD) Increment(metric string) {
 	i.c.Increment(metric)
 }
 
 // IncrementN increments metric by n in statsd
-func (i *Statsd) IncrementN(metric string, n int) {
+func (i *StatsD) IncrementN(metric string, n int) {
 	i.c.Count(metric, n)
 }
 
 // IncrementAll increments all metrics for given bucket in statsd
-func (i *Statsd) IncrementAll(b bucket.Bucket) {
+func (i *StatsD) IncrementAll(b bucket.Bucket) {
 	incrementAll(i, b)
 }
 
 // IncrementAllN increments all metrics for given bucket in statsd
-func (i *Statsd) IncrementAllN(b bucket.Bucket, n int) {
+func (i *StatsD) IncrementAllN(b bucket.Bucket, n int) {
 	incrementAllN(i, b, n)
 }

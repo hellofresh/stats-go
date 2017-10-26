@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/hellofresh/stats-go/log"
 )
 
 const (
@@ -26,10 +26,13 @@ const (
 
 var (
 	// ErrInvalidFormat error indicates that sections string has invalid format
-	ErrInvalidFormat = errors.New("Invalid sections format")
+	ErrInvalidFormat = errors.New("invalid sections format")
 
 	// ErrUnknownSectionTest error indicates that section has unknown test callback name
-	ErrUnknownSectionTest = errors.New("Unknown section test")
+	ErrUnknownSectionTest = errors.New("unknown section test")
+
+	// ErrLooksLikeID error indicates that second level ID auto-discover found suspicious metric
+	ErrLooksLikeID = errors.New("metric looks like ID")
 )
 
 // PathSection type represents single path section string
@@ -122,12 +125,11 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 		} else if config.AutoDiscoverThreshold > 0 {
 			if _, ok := config.autoDiscoverWhiteMap[firstFragment]; !ok {
 				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation[2]) {
-					log.WithFields(log.Fields{
-						"method":         r.Method,
-						"path":           r.URL.Path,
-						"first_fragment": firstFragment,
-						"operation":      operation,
-					}).Error("Second level ID auto-discover found suspicious metric")
+					log.Log("Second level ID auto-discover found suspicious metric", map[string]interface{}{
+						"method":    r.Method,
+						"path":      r.URL.Path,
+						"operation": operation,
+					}, ErrLooksLikeID)
 
 					operation[2] = MetricIDPlaceholder
 				}

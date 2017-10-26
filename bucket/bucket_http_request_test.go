@@ -2,15 +2,14 @@ package bucket
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
@@ -88,8 +87,23 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		assert.Equal(t, data.Operations, BuildHTTPRequestMetricOperation(r, callback))
 	}
 
-	hook := test.NewGlobal()
-	log.SetOutput(ioutil.Discard)
+	var (
+		logErrors      uint
+		logMessages    uint
+		logLastMessage string
+		logLastFields  map[string]interface{}
+		logLastError   error
+	)
+	log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		logLastMessage = msg
+		logLastFields = fields
+		logLastError = err
+		if err != nil {
+			logErrors++
+		} else {
+			logMessages++
+		}
+	})
 
 	firstSectionFoo := "foo"
 	firstSectionBar := "bar"
@@ -105,7 +119,7 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
 		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
 	}
-	assert.Equal(t, 0, len(hook.Entries))
+	assert.Equal(t, uint(0), logErrors+logMessages)
 
 	for i := idConfig.AutoDiscoverThreshold; i < idConfig.AutoDiscoverThreshold+idConfig.AutoDiscoverThreshold; i++ {
 		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
@@ -114,15 +128,14 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
 		assert.Equal(t, MetricOperation{"get", firstSectionBar, uItoA(i)}, BuildHTTPRequestMetricOperation(rBar, callback))
 	}
-	assert.Equal(t, idConfig.AutoDiscoverThreshold, uint(len(hook.Entries)))
-	assert.Equal(t, log.ErrorLevel, hook.LastEntry().Level)
-	assert.Equal(t, logSuspiciousMetric, hook.LastEntry().Message)
-	assert.Equal(t, log.Fields{
-		"method":         "GET",
-		"path":           "/foo/49",
-		"first_fragment": "foo",
-		"operation":      MetricOperation{"get", "foo", "49"},
-	}, hook.LastEntry().Data)
+	require.Equal(t, idConfig.AutoDiscoverThreshold, logErrors+logMessages)
+	require.Error(t, logLastError)
+	assert.Equal(t, logSuspiciousMetric, logLastMessage)
+	assert.Equal(t, map[string]interface{}{
+		"method":    "GET",
+		"path":      "/foo/49",
+		"operation": MetricOperation{"get", "foo", "49"},
+	}, logLastFields)
 }
 
 func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {

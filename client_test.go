@@ -3,31 +3,25 @@ package stats
 import (
 	"testing"
 
+	"github.com/hellofresh/stats-go/client"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewClient(t *testing.T) {
-	client, err := NewClient("statsd://")
+	statsClient, err := NewClient("log://")
 	assert.NoError(t, err)
-	assert.IsType(t, &StatsdClient{}, client)
+	assert.IsType(t, &client.Log{}, statsClient)
 
-	statsdClient, _ := client.(*StatsdClient)
-	assert.True(t, statsdClient.muted)
-
-	client, err = NewClient("log://")
+	statsClient, err = NewClient("memory://")
 	assert.NoError(t, err)
-	assert.IsType(t, &LogClient{}, client)
+	assert.IsType(t, &client.Memory{}, statsClient)
 
-	client, err = NewClient("memory://")
+	statsClient, err = NewClient("noop://")
 	assert.NoError(t, err)
-	assert.IsType(t, &MemoryClient{}, client)
+	assert.IsType(t, &client.Noop{}, statsClient)
 
-	client, err = NewClient("noop://")
-	assert.NoError(t, err)
-	assert.IsType(t, &NoopClient{}, client)
-
-	client, err = NewClient("unknown://")
-	assert.Nil(t, client)
+	statsClient, err = NewClient("unknown://")
+	assert.Nil(t, statsClient)
 	assert.Error(t, err)
 	assert.Equal(t, ErrUnknownClient, err)
 }

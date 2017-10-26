@@ -1,4 +1,4 @@
-package stats
+package client
 
 import (
 	"net/http"
@@ -6,70 +6,64 @@ import (
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/alexcesaro/statsd.v2"
 )
 
-// StatsdClient is Client implementation for statsd
-type StatsdClient struct {
+// StatsD is Client implementation for statsd
+type StatsD struct {
 	sync.Mutex
 	client             *statsd.Client
-	muted              bool
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 	httpRequestSection string
 	unicode            bool
 }
 
-// NewStatsdClient builds and returns new StatsdClient instance
-func NewStatsdClient(dsn, prefix string, unicode bool) *StatsdClient {
+// NewStatsD builds and returns new StatsD instance
+func NewStatsD(addr, prefix string, unicode bool) (*StatsD, error) {
 	var options []statsd.Option
-	muted := false
 
-	log.WithField("dsn", dsn).Info("Trying to connect to statsd instance")
-	if len(dsn) == 0 {
-		log.Debug("Statsd DSN not provided, client will be muted")
-		options = append(options, statsd.Mute(true))
-		muted = true
-	} else {
-		options = append(options, statsd.Address(dsn))
-	}
-
-	if len(prefix) > 0 {
+	if prefix != "" {
 		options = append(options, statsd.Prefix(prefix))
 	}
 
+	log.Log("Trying to connect to statsd instance", map[string]interface{}{
+		"addr":   addr,
+		"prefix": prefix,
+	}, nil)
+
 	statsdClient, err := statsd.New(options...)
 	if err != nil {
-		log.WithError(err).WithFields(log.Fields{
-			"dsn":    dsn,
+		log.Log("An error occurred while connecting to StatsD", map[string]interface{}{
+			"addr":   addr,
 			"prefix": prefix,
-		}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
-		muted = true
+		}, err)
+		return nil, err
 	}
 
-	client := &StatsdClient{client: statsdClient, muted: muted, unicode: unicode}
+	client := &StatsD{client: statsdClient, unicode: unicode}
 	client.ResetHTTPRequestSection()
 
-	return client
+	return client, nil
 }
 
 // BuildTimer builds timer to track metric timings
-func (c *StatsdClient) BuildTimer() timer.Timer {
-	return timer.New(c.client, c.muted)
+func (c *StatsD) BuildTimer() timer.Timer {
+	return timer.NewStatsD(c.client)
 }
 
 // Close statsd connection
-func (c *StatsdClient) Close() error {
+func (c *StatsD) Close() error {
 	c.client.Close()
 	return nil
 }
 
 // TrackRequest tracks HTTP Request stats
-func (c *StatsdClient) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
+func (c *StatsD) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
 	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
-	i := incrementer.New(c.client, c.muted)
+	i := incrementer.NewStatsD(c.client)
 
 	t.Finish(b.Metric())
 	i.IncrementAll(b)
@@ -78,9 +72,9 @@ func (c *StatsdClient) TrackRequest(r *http.Request, t timer.Timer, success bool
 }
 
 // TrackOperation tracks custom operation
-func (c *StatsdClient) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *StatsD) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
-	i := incrementer.New(c.client, c.muted)
+	i := incrementer.NewStatsD(c.client)
 
 	if nil != t {
 		t.Finish(b.MetricWithSuffix())
@@ -91,9 +85,9 @@ func (c *StatsdClient) TrackOperation(section string, operation bucket.MetricOpe
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *StatsdClient) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *StatsD) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
-	i := incrementer.New(c.client, c.muted)
+	i := incrementer.NewStatsD(c.client)
 
 	if nil != t {
 		t.Finish(b.MetricWithSuffix())
@@ -104,9 +98,9 @@ func (c *StatsdClient) TrackOperationN(section string, operation bucket.MetricOp
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *StatsdClient) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *StatsD) TrackMetric(section string, operation bucket.MetricOperation) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
-	i := incrementer.New(c.client, c.muted)
+	i := incrementer.NewStatsD(c.client)
 
 	i.Increment(b.Metric())
 	i.Increment(b.MetricTotal())
@@ -115,9 +109,9 @@ func (c *StatsdClient) TrackMetric(section string, operation bucket.MetricOperat
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *StatsdClient) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *StatsD) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
-	i := incrementer.New(c.client, c.muted)
+	i := incrementer.NewStatsD(c.client)
 
 	i.IncrementN(b.Metric(), n)
 	i.IncrementN(b.MetricTotal(), n)
@@ -126,9 +120,9 @@ func (c *StatsdClient) TrackMetricN(section string, operation bucket.MetricOpera
 }
 
 // TrackState tracks metric absolute value
-func (c *StatsdClient) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *StatsD) TrackState(section string, operation bucket.MetricOperation, value int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
-	s := state.New(c.client, c.muted)
+	s := state.NewStatsD(c.client)
 
 	s.Set(b.Metric(), value)
 
@@ -136,7 +130,7 @@ func (c *StatsdClient) TrackState(section string, operation bucket.MetricOperati
 }
 
 // SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
-func (c *StatsdClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
+func (c *StatsD) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client {
 	c.Lock()
 	defer c.Unlock()
 
@@ -145,7 +139,7 @@ func (c *StatsdClient) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlter
 }
 
 // GetHTTPMetricCallback gets callback handler that allows metric operation alteration for HTTP Request
-func (c *StatsdClient) GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallback {
+func (c *StatsD) GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallback {
 	c.Lock()
 	defer c.Unlock()
 
@@ -153,7 +147,7 @@ func (c *StatsdClient) GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallbac
 }
 
 // SetHTTPRequestSection sets metric section for HTTP Request metrics
-func (c *StatsdClient) SetHTTPRequestSection(section string) Client {
+func (c *StatsD) SetHTTPRequestSection(section string) Client {
 	c.Lock()
 	defer c.Unlock()
 
@@ -162,6 +156,6 @@ func (c *StatsdClient) SetHTTPRequestSection(section string) Client {
 }
 
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
-func (c *StatsdClient) ResetHTTPRequestSection() Client {
+func (c *StatsD) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
 }

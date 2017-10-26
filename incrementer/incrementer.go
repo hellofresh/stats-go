@@ -2,7 +2,6 @@ package incrementer
 
 import (
 	"github.com/hellofresh/stats-go/bucket"
-	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
 // Incrementer is a metric incrementer interface
@@ -18,14 +17,6 @@ type Incrementer interface {
 
 	// Increment increments all metrics for given bucket by n
 	IncrementAllN(b bucket.Bucket, n int)
-}
-
-// New builds and returns new Incrementer instance
-func New(c *statsd.Client, muted bool) Incrementer {
-	if muted {
-		return &Log{}
-	}
-	return &Statsd{c}
 }
 
 func incrementAll(i Incrementer, b bucket.Bucket) {

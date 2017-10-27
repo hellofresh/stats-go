@@ -150,7 +150,7 @@ func main() {
 ### Logging
 
 `hellofresh/stats-go` uses default `log` package for debug and error logging.
-If you want to use your own logger - `stats.SetLogHandler()` is available.
+If you want to use your own logger - `stats-go/log.SetHandler()` is available.
 Here is how you can use, e.g. `github.com/sirupsen/logrus` for logging:
 
 ```go
@@ -262,8 +262,8 @@ you can get generic metric `get.users.-id-` instead thousands of metrics like `g
 `get.users.42` etc. that may make your `graphite` suffer from overloading.
 
 To use metric generalisation by second level path ID, you can pass `stats.bucket.HttpMetricNameAlterCallback` instance to
-`stats.client.Client.SetHttpMetricCallback()`. Also there is a shortcut function `stats.bucket.NewHasIDAtSecondLevelCallback()`
-that generates a callback handler for `stats.bucket.SectionsTestsMap`, and shortcut function `stats.bucket.ParseSectionsTestsMap`,
+`stats-go//client.Client.SetHttpMetricCallback()`. Also there is a shortcut function `stats-go//bucket.NewHasIDAtSecondLevelCallback()`
+that generates a callback handler for `stats-go//bucket.SectionsTestsMap`, and shortcut function `stats-go//bucket.ParseSectionsTestsMap`,
 that generates sections test map from string, so you can get these values from config.
 It accepts a list of sections with test callback in the following format: `<section>:<test-callback-name>`.
 You can use either double colon or new line character as section-callback pairs separator, so all of the following
@@ -282,7 +282,7 @@ Currently the following test callbacks are implemented:
 * `not_empty` - only not empty second path level is interpreted as ID,
   e.g. `/users/13` -> `users.-id-`, `/users` -> `users.-`
 
-You can register your own test callback functions using the `stats.RegisterSectionTest()` function
+You can register your own test callback functions using the `stats-go/bucket.RegisterSectionTest()` function
 before parsing sections map from string.
 
 ```go

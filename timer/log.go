@@ -3,7 +3,7 @@ package timer
 import (
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/hellofresh/stats-go/log"
 )
 
 // Log struct is Timer interface implementation that writes all timings to log
@@ -19,8 +19,8 @@ func (t *Log) Start() Timer {
 
 // Finish writes elapsed time for metric to log
 func (t *Log) Finish(bucket string) {
-	log.WithFields(log.Fields{
+	log.Log("Stats timer finished", map[string]interface{}{
 		"bucket":  bucket,
 		"elapsed": time.Now().Sub(t.timerStart).String(),
-	}).Debug("Muted stats timer send")
+	}, nil)
 }

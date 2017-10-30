@@ -1,26 +1,29 @@
 package timer
 
 import (
-	"io/ioutil"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
-	hook := test.NewGlobal()
-
-	log.SetLevel(log.DebugLevel)
-	log.SetOutput(ioutil.Discard)
+	var (
+		logMessages []string
+		logFields   []map[string]interface{}
+	)
+	log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		logMessages = append(logMessages, msg)
+		logFields = append(logFields, fields)
+	})
 
 	b := "foo.bar.bucket"
 
 	tr := &Log{}
 	tr.Start().Finish(b)
 
-	assert.Equal(t, 1, len(hook.Entries))
-	assert.Equal(t, "Muted stats timer send", hook.Entries[0].Message)
-	assert.Equal(t, b, hook.Entries[0].Data["bucket"])
+	require.Equal(t, 1, len(logMessages))
+	assert.Equal(t, "Stats timer finished", logMessages[0])
+	assert.Equal(t, b, logFields[0]["bucket"])
 }

@@ -1,20 +1,23 @@
 package incrementer
 
 import (
-	"io/ioutil"
 	"testing"
 
 	"github.com/hellofresh/stats-go/bucket"
-	log "github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLog(t *testing.T) {
-	hook := test.NewGlobal()
-
-	log.SetLevel(log.DebugLevel)
-	log.SetOutput(ioutil.Discard)
+	var (
+		logMessages []string
+		logFields   []map[string]interface{}
+	)
+	log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		logMessages = append(logMessages, msg)
+		logFields = append(logFields, fields)
+	})
 
 	b := "foo.bar.bucket"
 	n := 42
@@ -23,30 +26,32 @@ func TestLog(t *testing.T) {
 	i.Increment(b)
 	i.IncrementN(b, n)
 
-	assert.Equal(t, 2, len(hook.Entries))
-	assert.Equal(t, "Muted stats counter increment", hook.Entries[0].Message)
-	assert.Equal(t, b, hook.Entries[0].Data["metric"])
-	assert.Equal(t, "Muted stats counter increment by n", hook.Entries[1].Message)
-	assert.Equal(t, b, hook.Entries[1].Data["metric"])
-	assert.Equal(t, n, hook.Entries[1].Data["n"])
+	require.Equal(t, 2, len(logMessages))
+	assert.Equal(t, "Stats counter incremented", logMessages[0])
+	assert.Equal(t, b, logFields[0]["metric"])
+	assert.Equal(t, "Stats counter incremented by n", logMessages[1])
+	assert.Equal(t, b, logFields[1]["metric"])
+	assert.Equal(t, n, logFields[1]["n"])
 
-	hook.Reset()
+	logMessages = make([]string, 0)
+	logFields = make([]map[string]interface{}, 0)
 
 	bb := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
 	i.IncrementAll(bb)
 
-	assert.Equal(t, 4, len(hook.Entries))
+	assert.Equal(t, 4, len(logMessages))
 	for j := 0; j < 4; j++ {
-		assert.Equal(t, "Muted stats counter increment", hook.Entries[j].Message)
+		assert.Equal(t, "Stats counter incremented", logMessages[j])
 	}
 
-	hook.Reset()
+	logMessages = make([]string, 0)
+	logFields = make([]map[string]interface{}, 0)
 
 	i.IncrementAllN(bb, n)
 
-	assert.Equal(t, 4, len(hook.Entries))
+	assert.Equal(t, 4, len(logMessages))
 	for j := 0; j < 4; j++ {
-		assert.Equal(t, "Muted stats counter increment by n", hook.Entries[j].Message)
-		assert.Equal(t, n, hook.Entries[j].Data["n"])
+		assert.Equal(t, "Stats counter incremented by n", logMessages[j])
+		assert.Equal(t, n, logFields[j]["n"])
 	}
 }

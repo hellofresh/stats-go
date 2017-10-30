@@ -1,19 +1,22 @@
 package state
 
 import (
-	"io/ioutil"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLog_Set(t *testing.T) {
-	hook := test.NewGlobal()
-
-	log.SetLevel(log.DebugLevel)
-	log.SetOutput(ioutil.Discard)
+	var (
+		logMessages []string
+		logFields   []map[string]interface{}
+	)
+	log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		logMessages = append(logMessages, msg)
+		logFields = append(logFields, fields)
+	})
 
 	metric1 := "metric1"
 	metric2 := "metric2"
@@ -24,12 +27,12 @@ func TestLog_Set(t *testing.T) {
 	logger.Set(metric1, metricState1)
 	logger.Set(metric2, metricState2)
 
-	assert.Equal(t, 2, len(hook.Entries))
-	assert.Equal(t, "Muted stats state send", hook.Entries[0].Message)
-	assert.Equal(t, metric1, hook.Entries[0].Data["bucket"])
-	assert.Equal(t, metricState1, hook.Entries[0].Data["state"])
+	require.Equal(t, 2, len(logMessages))
+	assert.Equal(t, "Stats state set", logMessages[0])
+	assert.Equal(t, metric1, logFields[0]["bucket"])
+	assert.Equal(t, metricState1, logFields[0]["state"])
 
-	assert.Equal(t, "Muted stats state send", hook.Entries[1].Message)
-	assert.Equal(t, metric2, hook.Entries[1].Data["bucket"])
-	assert.Equal(t, metricState2, hook.Entries[1].Data["state"])
+	assert.Equal(t, "Stats state set", logMessages[1])
+	assert.Equal(t, metric2, logFields[1]["bucket"])
+	assert.Equal(t, metricState2, logFields[1]["state"])
 }

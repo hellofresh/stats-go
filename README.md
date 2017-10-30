@@ -36,7 +36,7 @@ go get -u github.com/hellofresh/stats-go
 
 ## Usage
 
-#### Instance creation
+### Instance creation
 
 Connection DSN has the following format: `<type>://<connection params>/<connection path>?<connection options>`.
 
@@ -78,7 +78,7 @@ func main() {
 }
 ```
 
-#### Count metrics manually
+### Count metrics manually
 
 ```go
 import "github.com/hellofresh/stats-go/bucket"
@@ -94,7 +94,7 @@ ordersInLast24h := orderService.Count(time.Duration(24)*time.Hour)
 statsClient.TrackState("ordering", operations, ordersInLast24h)
 ```
 
-#### Track requests metrics with middleware, e.g. for [Gin Web Framework](https://github.com/gin-gonic/gin)
+### Track requests metrics with middleware, e.g. for [Gin Web Framework](https://github.com/gin-gonic/gin)
 
 ```go
 package middleware
@@ -103,21 +103,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hellofresh/stats-go"
-	log "github.com/sirupsen/logrus"
+	"github.com/hellofresh/stats-go/client"
 )
 
 // NewStatsRequest returns a middleware handler function.
-func NewStatsRequest(sc stats.Client) gin.HandlerFunc {
+func NewStatsRequest(sc client.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.WithField("path", c.Request.URL.Path).Debug("Starting Stats middleware")
-
 		timing := sc.BuildTimer().Start()
 
 		c.Next()
 
 		success := c.Writer.Status() < http.StatusBadRequest
-		log.WithFields(log.Fields{"request_url": c.Request.URL.Path}).Debug("Track request stats")
 		sc.TrackRequest(c.Request, timing, success)
 	}
 }
@@ -136,7 +132,7 @@ import (
 )
 
 func main() {
-        statsClient := stats.NewStatsdClient(os.Getenv("STATS_DSN"), os.Getenv("STATS_PREFIX"))
+        statsClient := stats.NewClient(os.Getenv("STATS_DSN"))
         defer statsClient.Close()
 
         router := gin.Default()
@@ -151,20 +147,48 @@ func main() {
 }
 ```
 
-#### Usage for error logs monitoring
+### Logging
+
+`hellofresh/stats-go` uses default `log` package for debug and error logging.
+If you want to use your own logger - `stats-go/log.SetHandler()` is available.
+Here is how you can use, e.g. `github.com/sirupsen/logrus` for logging:
+
+```go
+package main
+
+import (
+    "github.com/hellofresh/stats-go/log"
+    "github.com/sirupsen/logrus"
+)
+
+func main() {
+    log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+    	entry = logrus.WithFields(logrus.Fields(fields))
+    	if err == nil {
+    		entry.Debug(msg)
+    	} else {
+    		entry.WithError(err).Error(msg)
+    	}
+    })
+
+    // do your application stuff
+}
+```
+
+### Usage for error logs monitoring
 
 ```go
 package foo
 
 import (
-        "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/client"
         "github.com/hellofresh/stats-go/hooks"
         log "github.com/sirupsen/logrus"
 )
 
 const sectionErrors = "errors"
 
-func initErrorsMonitoring(statsClient stats.Client) {
+func initErrorsMonitoring(statsClient client.Client) {
         hook := hooks.NewLogrusHook(statsClient, sectionErrors)
         log.AddHook(hook)
 
@@ -188,13 +212,13 @@ func initErrorsMonitoring(statsClient stats.Client) {
 package foo
 
 import (
-        "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/client"
         "github.com/hellofresh/stats-go/bucket"
 )
 
 const sectionStatsFoo = "foo"
 
-func DoSomeJob(statsClient stats.Client) error {
+func DoSomeJob(statsClient client.Client) error {
         tt := statsClient.BuildTimer().Start()
         operation := bucket.MetricOperation{"do", "some", "job"}
 
@@ -212,6 +236,7 @@ import (
         "testing"
 
         "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/client"
         "github.com/stretchr/testify/assert"
 )
 
@@ -221,7 +246,7 @@ func TestDoSomeJob(t *testing.T) {
         err := DoSomeJob(statsClient)
         assert.Nil(t, err)
 
-        statsMemory, _ := statsClient.(*stats.MemoryClient)
+        statsMemory, _ := statsClient.(*client.Memory)
         assert.Equal(t, 1, len(statsMemory.TimerMetrics))
         assert.Equal(t, "foo-ok.do.some.job", statsMemory.TimerMetrics[0].Bucket)
         assert.Equal(t, 1, statsMemory.CountMetrics["foo-ok.do.some.job"])
@@ -236,9 +261,9 @@ e.g. access time to concrete users pages does not matter a lot, but average acce
 you can get generic metric `get.users.-id-` instead thousands of metrics like `get.users.1`, `get.users.13`,
 `get.users.42` etc. that may make your `graphite` suffer from overloading.
 
-To use metric generalisation by second level path ID, you can pass `stats.HttpMetricNameAlterCallback` instance to
-`stats.Client.SetHttpMetricCallback()`. Also there is a shortcut function `stats.NewHasIDAtSecondLevelCallback()`
-that generates a callback handler for `stats.SectionsTestsMap`, and shortcut function `stats.ParseSectionsTestsMap`,
+To use metric generalisation by second level path ID, you can pass `stats.bucket.HttpMetricNameAlterCallback` instance to
+`stats-go//client.Client.SetHttpMetricCallback()`. Also there is a shortcut function `stats-go//bucket.NewHasIDAtSecondLevelCallback()`
+that generates a callback handler for `stats-go//bucket.SectionsTestsMap`, and shortcut function `stats-go//bucket.ParseSectionsTestsMap`,
 that generates sections test map from string, so you can get these values from config.
 It accepts a list of sections with test callback in the following format: `<section>:<test-callback-name>`.
 You can use either double colon or new line character as section-callback pairs separator, so all of the following
@@ -257,7 +282,7 @@ Currently the following test callbacks are implemented:
 * `not_empty` - only not empty second path level is interpreted as ID,
   e.g. `/users/13` -> `users.-id-`, `/users` -> `users.-`
 
-You can register your own test callback functions using the `stats.RegisterSectionTest()` function
+You can register your own test callback functions using the `stats-go/bucket.RegisterSectionTest()` function
 before parsing sections map from string.
 
 ```go

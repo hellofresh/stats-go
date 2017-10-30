@@ -1,4 +1,4 @@
-package stats
+package client
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ import (
 )
 
 func TestNoopClient(t *testing.T) {
-	client := NewNoopClient(true)
+	client := NewNoop(true)
 
 	assert.Nil(t, client.Close())
 	assert.IsType(t, &timer.Memory{}, client.BuildTimer())
@@ -29,7 +29,7 @@ func TestNoopClient(t *testing.T) {
 }
 
 func TestNewNoopClient_SetHTTPMetricCallback(t *testing.T) {
-	client := NewNoopClient(true)
+	client := NewNoop(true)
 	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
 		return metricParts
 	}

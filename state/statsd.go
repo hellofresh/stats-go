@@ -1,13 +1,18 @@
 package state
 
-import statsd "gopkg.in/alexcesaro/statsd.v2"
+import "gopkg.in/alexcesaro/statsd.v2"
 
-// Statsd struct is State interface implementation that writes all states to statsd gauge
-type Statsd struct {
+// StatsD struct is State interface implementation that writes all states to statsd gauge
+type StatsD struct {
 	c *statsd.Client
 }
 
+// NewStatsD creates new statsd state instance
+func NewStatsD(c *statsd.Client) *StatsD {
+	return &StatsD{c: c}
+}
+
 // Set sets metric state
-func (s *Statsd) Set(metric string, n int) {
+func (s *StatsD) Set(metric string, n int) {
 	s.c.Gauge(metric, n)
 }

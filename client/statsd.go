@@ -22,11 +22,15 @@ type StatsD struct {
 }
 
 // NewStatsD builds and returns new StatsD instance
-func NewStatsD(addr, prefix string, unicode bool) (*StatsD, error) {
+func NewStatsD(addr string, prefix string, unicode bool) (*StatsD, error) {
 	var options []statsd.Option
 
 	if prefix != "" {
 		options = append(options, statsd.Prefix(prefix))
+	}
+
+	if addr != "" {
+		options = append(options, statsd.Address(addr))
 	}
 
 	log.Log("Trying to connect to statsd instance", map[string]interface{}{

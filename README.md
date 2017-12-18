@@ -151,7 +151,8 @@ func main() {
 
 `hellofresh/stats-go` uses default `log` package for debug and error logging.
 If you want to use your own logger - `stats-go/log.SetHandler()` is available.
-Here is how you can use, e.g. `github.com/sirupsen/logrus` for logging:
+
+#### Use `github.com/sirupsen/logrus` for logging
 
 ```go
 package main
@@ -175,7 +176,43 @@ func main() {
 }
 ```
 
-### Usage for error logs monitoring
+#### Use `go.uber.org/zap` for logging
+
+```go
+package main
+
+import (
+	"github.com/hellofresh/stats-go/log"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
+
+func main() {
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
+
+	log.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		fieldsLen := len(fields)
+		zapFields := make([]zapcore.Field, fieldsLen)
+		
+		i := 0
+		for name, val := range fields {
+			zapFields[i] = zap.Any(name, val)
+			i++
+		}
+
+		if err != nil { 
+			logger.Error(msg, zap.Error(err), zapFields...)
+		} else {
+			logger.Debug(msg, zapFields...)
+		}
+	})
+
+	// do your application stuff
+}
+```
+
+### Usage for error logs monitoring using `github.com/sirupsen/logrus`
 
 ```go
 package foo

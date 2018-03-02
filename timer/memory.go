@@ -16,6 +16,12 @@ type Memory struct {
 	elapsed time.Duration
 }
 
+// StartAt starts timer at a given time
+func (t *Memory) StartAt(s time.Time) Timer {
+	t.timerStart = s
+	return t
+}
+
 // Start starts timer
 func (t *Memory) Start() Timer {
 	t.timerStart = time.Now()

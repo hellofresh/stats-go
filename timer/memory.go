@@ -16,6 +16,12 @@ type Memory struct {
 	elapsed time.Duration
 }
 
+// StartAt starts timer at a given time
+func (t *Memory) StartAt(s time.Time) Timer {
+	t.timerStart = s
+	return t
+}
+
 // Start starts timer
 func (t *Memory) Start() Timer {
 	t.timerStart = time.Now()
@@ -26,6 +32,11 @@ func (t *Memory) Start() Timer {
 func (t *Memory) Finish(bucket string) {
 	t.bucket = bucket
 	t.elapsed = time.Now().Sub(t.timerStart)
+}
+
+// FinishWithLabels writes elapsed time for metric to log
+func (t *Memory) FinishWithLabels(bucket string, labels map[string]string) {
+	t.Finish(bucket)
 }
 
 // Elapsed returns elapsed duration

@@ -53,6 +53,11 @@ func NewStatsD(addr string, prefix string, unicode bool) (*StatsD, error) {
 	return client, nil
 }
 
+// WithLabels adds labels map to metrics
+func (c *StatsD) WithLabels(labels map[string]string) Client {
+	return c
+}
+
 // BuildTimer builds timer to track metric timings
 func (c *StatsD) BuildTimer() timer.Timer {
 	return timer.NewStatsD(c.client)
@@ -162,4 +167,9 @@ func (c *StatsD) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *StatsD) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *StatsD) Handler() http.Handler {
+	return nil
 }

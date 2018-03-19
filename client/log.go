@@ -26,6 +26,11 @@ func NewLog(unicode bool) *Log {
 	return client
 }
 
+// WithLabels adds labels map to metrics
+func (c *Log) WithLabels(labels map[string]string) Client {
+	return c
+}
+
 // BuildTimer builds timer to track metric timings
 func (c *Log) BuildTimer() timer.Timer {
 	return &timer.Log{}
@@ -134,4 +139,9 @@ func (c *Log) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Log) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Log) Handler() http.Handler {
+	return nil
 }

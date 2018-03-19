@@ -21,6 +21,11 @@ func NewNoop(unicode bool) *Noop {
 	return &Noop{unicode: unicode}
 }
 
+// WithLabels adds labels map to metrics
+func (c *Noop) WithLabels(labels map[string]string) Client {
+	return c
+}
+
 // BuildTimer builds timer to track metric timings
 func (c *Noop) BuildTimer() timer.Timer {
 	return &timer.Memory{}
@@ -86,4 +91,9 @@ func (c *Noop) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Noop) ResetHTTPRequestSection() Client {
 	return c
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Noop) Handler() http.Handler {
+	return nil
 }

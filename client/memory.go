@@ -31,6 +31,11 @@ func NewMemory(unicode bool) *Memory {
 	return client
 }
 
+// WithLabels adds labels map to metrics
+func (c *Memory) WithLabels(labels map[string]string) Client {
+	return c
+}
+
 func (c *Memory) resetMetrics() {
 	c.TimerMetrics = []timer.Metric{}
 	c.CountMetrics = map[string]int{}
@@ -176,4 +181,9 @@ func (c *Memory) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Memory) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Memory) Handler() http.Handler {
+	return nil
 }

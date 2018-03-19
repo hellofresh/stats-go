@@ -11,6 +11,12 @@ type Log struct {
 	timerStart time.Time
 }
 
+// StartAt starts timer at a given time
+func (t *Log) StartAt(s time.Time) Timer {
+	t.timerStart = s
+	return t
+}
+
 // Start starts timer
 func (t *Log) Start() Timer {
 	t.timerStart = time.Now()
@@ -23,4 +29,9 @@ func (t *Log) Finish(bucket string) {
 		"bucket":  bucket,
 		"elapsed": time.Now().Sub(t.timerStart).String(),
 	}, nil)
+}
+
+// FinishWithLabels writes elapsed time for metric to log
+func (t *Log) FinishWithLabels(bucket string, labels map[string]string) {
+	t.Finish(bucket)
 }

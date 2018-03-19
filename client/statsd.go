@@ -171,5 +171,7 @@ func (c *StatsD) ResetHTTPRequestSection() Client {
 
 // Handler returns metrics endpoint for prometheus backend
 func (c *StatsD) Handler() http.Handler {
-	return nil
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

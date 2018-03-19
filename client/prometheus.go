@@ -59,6 +59,9 @@ func (c *Prometheus) Close() error {
 
 // TrackRequest tracks HTTP Request stats
 func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
+	c.Lock()
+	defer c.Unlock()
+
 	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
@@ -76,7 +79,6 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 
 	keyHash := ""
 
-	c.Lock()
 	for key := range c.labels {
 		keyHash += "_" + key
 	}
@@ -97,7 +99,6 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 	c.increments[metric+keyHash].IncrementWithLabels(metric, requestLabels)
 	c.increments[metricTotal+keyHash].IncrementWithLabels(metricTotal, requestLabels)
 	c.labels = map[string]string{}
-	c.Unlock()
 
 	return c
 }

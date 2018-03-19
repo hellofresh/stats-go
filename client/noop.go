@@ -95,5 +95,7 @@ func (c *Noop) ResetHTTPRequestSection() Client {
 
 // Handler returns metrics endpoint for prometheus backend
 func (c *Noop) Handler() http.Handler {
-	return nil
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

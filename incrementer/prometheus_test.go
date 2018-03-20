@@ -58,7 +58,7 @@ func (m *CounterFactoryMock) Create(metric string, labelKeys []string) CounterVe
 }
 
 func TestPrometheus_Increment(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
@@ -68,17 +68,17 @@ func TestPrometheus_Increment(t *testing.T) {
 }
 
 func TestPrometheus_IncrementWithLabels(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
-	i.IncrementWithLabels(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
+	i.IncrementWithLabels(b.Metric(), []string{"key1", "key2"}, []string{"value1", "value2"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 2, len(m.mock.values))
 }
 
 func TestPrometheus_IncrementN(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
@@ -88,11 +88,11 @@ func TestPrometheus_IncrementN(t *testing.T) {
 }
 
 func TestPrometheus_IncrementNWithLabels(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
-	i.IncrementWithLabels(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
+	i.IncrementWithLabels(b.Metric(), []string{"key1", "key2"}, []string{"value1", "value2"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 2, len(m.mock.values))
 	assert.Equal(t, "value1", m.mock.values[0])

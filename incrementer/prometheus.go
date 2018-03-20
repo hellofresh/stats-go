@@ -62,20 +62,12 @@ func (i *Prometheus) Increment(metric string) {
 }
 
 // IncrementWithLabels increments metric in prometheus with defined labels
-func (i *Prometheus) IncrementWithLabels(metric string, labels map[string]string) {
-	var keys []string
-	var values []string
-
-	for key, value := range labels {
-		keys = append(keys, key)
-		values = append(values, value)
-	}
-
+func (i *Prometheus) IncrementWithLabels(metric string, labelNames, labelValues []string) {
 	if i.counter == nil {
-		i.counter = i.counterFactory.Create(metric, keys)
+		i.counter = i.counterFactory.Create(metric, labelNames)
 	}
 
-	i.counter.WithLabelValues(values...).Inc()
+	i.counter.WithLabelValues(labelValues...).Inc()
 }
 
 // IncrementN increments metric by n in prometheus
@@ -88,20 +80,12 @@ func (i *Prometheus) IncrementN(metric string, n int) {
 }
 
 // IncrementNWithLabels increments metric by n in prometheus with defined labels
-func (i *Prometheus) IncrementNWithLabels(metric string, n int, labels map[string]string) {
-	keys := []string{}
-	values := []string{}
-
-	for key, value := range labels {
-		keys = append(keys, key)
-		values = append(values, value)
-	}
-
+func (i *Prometheus) IncrementNWithLabels(metric string, n int, labelNames, labelValues []string) {
 	if i.counter == nil {
-		i.counter = i.counterFactory.Create(metric, keys)
+		i.counter = i.counterFactory.Create(metric, labelNames)
 	}
 
-	i.counter.WithLabelValues(values...).Add(float64(n))
+	i.counter.WithLabelValues(labelValues...).Add(float64(n))
 }
 
 // IncrementAll increments all metrics for given bucket in prometheus

@@ -35,8 +35,8 @@ func TestMemory_Increment(t *testing.T) {
 
 func TestMemory_IncrementAll(t *testing.T) {
 	i := NewMemory()
-	b1 := bucket.NewPlain("section1", bucket.MetricOperation{"o11", "o12", "o13"}, true, true)
-	b2 := bucket.NewPlain("section2", bucket.MetricOperation{"o21", "o22", "o23"}, false, true)
+	b1 := bucket.NewPlain("section1", bucket.NewMetricOperation([3]string{"o11", "o12", "o13"}, []string{}), true, true)
+	b2 := bucket.NewPlain("section2", bucket.NewMetricOperation([3]string{"o21", "o22", "o23"}, []string{}), false, true)
 	metricN := 5
 
 	allB1 := []string{b1.Metric(), b1.MetricWithSuffix(), b1.MetricTotal(), b1.MetricTotalWithSuffix()}

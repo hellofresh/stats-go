@@ -24,7 +24,6 @@ type Prometheus struct {
 	namespace  string
 	increments map[string]*incrementer.Prometheus
 	states     map[string]*state.Prometheus
-	labels     map[string]string
 }
 
 // NewPrometheus builds and returns new Prometheus instance
@@ -33,18 +32,8 @@ func NewPrometheus(namespace string) (*Prometheus, error) {
 		namespace:  namespace,
 		increments: make(map[string]*incrementer.Prometheus),
 		states:     make(map[string]*state.Prometheus),
-		labels:     make(map[string]string),
 	}
 	return client, nil
-}
-
-// WithLabels adds labels map to metrics
-func (c *Prometheus) WithLabels(labels map[string]string) Client {
-	c.Lock()
-	defer c.Unlock()
-
-	c.labels = labels
-	return c
 }
 
 // BuildTimer builds timer to track metric timings
@@ -77,28 +66,19 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 	metricTotal = strings.Replace(metricTotal, "-", "", -1)
 	metricTotal = strings.Replace(metricTotal, ".", "_", -1)
 
-	keyHash := ""
-
-	for key := range c.labels {
-		keyHash += "_" + key
+	if _, ok := c.increments[metric]; !ok {
+		c.increments[metric] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
 	}
 
-	if _, ok := c.increments[metric+keyHash]; !ok {
-		c.increments[metric+keyHash] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
+	if _, ok := c.increments[metricTotal]; !ok {
+		c.increments[metricTotal] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
 	}
 
-	if _, ok := c.increments[metricTotal+keyHash]; !ok {
-		c.increments[metricTotal+keyHash] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
-	}
+	labelNames := []string{"success", "action"}
+	labelValues := []string{strconv.FormatBool(success), r.Method}
 
-	requestLabels := map[string]string{
-		"action":  r.Method,
-		"success": strconv.FormatBool(success),
-	}
-
-	c.increments[metric+keyHash].IncrementWithLabels(metric, requestLabels)
-	c.increments[metricTotal+keyHash].IncrementWithLabels(metricTotal, requestLabels)
-	c.labels = map[string]string{}
+	c.increments[metric].IncrementWithLabels(metric, labelNames, labelValues)
+	c.increments[metricTotal].IncrementWithLabels(metricTotal, labelNames, labelValues)
 
 	return c
 }
@@ -109,7 +89,13 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 	if nil != t {
 		t.FinishWithLabels(b.Metric(), map[string]string{"success": strconv.FormatBool(success)})
 	}
-	c.WithLabels(map[string]string{"success": strconv.FormatBool(success)}).TrackMetric(section, operation)
+
+	labelValues := []string{strconv.FormatBool(success)}
+	for _, v := range operation.LabelValues {
+		labelValues = append(labelValues, v)
+	}
+
+	c.TrackMetric(section, operation.WithLabels(labelValues...))
 	return c
 }
 
@@ -119,7 +105,12 @@ func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOper
 	if nil != t {
 		t.FinishWithLabels(b.Metric(), map[string]string{"success": strconv.FormatBool(success)})
 	}
-	c.WithLabels(map[string]string{"success": strconv.FormatBool(success)}).TrackMetricN(section, operation, n)
+	labelValues := []string{strconv.FormatBool(success)}
+	for _, v := range operation.LabelValues {
+		labelValues = append(labelValues, v)
+	}
+
+	c.TrackMetricN(section, operation.WithLabels(labelValues...), n)
 	return c
 }
 
@@ -140,9 +131,19 @@ func (c *Prometheus) TrackMetric(section string, operation bucket.MetricOperatio
 		c.increments[metricTotal] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
 	}
 
-	c.increments[metric].IncrementWithLabels(metric, c.labels)
-	c.increments[metricTotal].IncrementWithLabels(metricTotal, c.labels)
-	c.labels = map[string]string{}
+	var labelValues []string
+
+	if len(operation.LabelValues) != len(operation.LabelNames) {
+		labelValues = []string{"true"}
+		for _, v := range operation.LabelValues {
+			labelValues = append(labelValues, v)
+		}
+	} else {
+		labelValues = operation.LabelValues
+	}
+
+	c.increments[metric].IncrementWithLabels(metric, operation.LabelNames, labelValues)
+	c.increments[metricTotal].IncrementWithLabels(metricTotal, operation.LabelNames, labelValues)
 
 	return c
 }
@@ -164,9 +165,19 @@ func (c *Prometheus) TrackMetricN(section string, operation bucket.MetricOperati
 		c.increments[metricTotal] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
 	}
 
-	c.increments[metric].IncrementNWithLabels(metric, n, c.labels)
-	c.increments[metricTotal].IncrementNWithLabels(metricTotal, n, c.labels)
-	c.labels = map[string]string{}
+	var labelValues []string
+
+	if len(operation.LabelValues) != len(operation.LabelNames) {
+		labelValues = []string{"true"}
+		for _, v := range operation.LabelValues {
+			labelValues = append(labelValues, v)
+		}
+	} else {
+		labelValues = operation.LabelValues
+	}
+
+	c.increments[metric].IncrementNWithLabels(metric, n, operation.LabelNames, labelValues)
+	c.increments[metricTotal].IncrementNWithLabels(metricTotal, n, operation.LabelNames, labelValues)
 
 	return c
 }
@@ -183,8 +194,12 @@ func (c *Prometheus) TrackState(section string, operation bucket.MetricOperation
 		c.states[metric] = state.NewPrometheus(state.NewPrometheusGaugeFactory())
 	}
 
-	c.states[metric].SetWithLabels(metric, value, c.labels)
-	c.labels = map[string]string{}
+	labelValues := []string{"true"}
+	for _, v := range operation.LabelValues {
+		labelValues = append(labelValues, v)
+	}
+
+	c.states[metric].SetWithLabels(metric, value, operation.LabelNames, labelValues)
 
 	return c
 }

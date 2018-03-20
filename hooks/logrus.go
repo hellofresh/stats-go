@@ -24,6 +24,7 @@ func (h *LogrusHook) Levels() []logrus.Level {
 
 // Fire is logrus.Hook method implementation
 func (h *LogrusHook) Fire(e *logrus.Entry) error {
-	h.statsClient.TrackMetric(h.section, bucket.MetricOperation{e.Level.String()})
+	m := bucket.NewMetricOperation([3]string{e.Level.String()}, []string{})
+	h.statsClient.TrackMetric(h.section, m)
 	return nil
 }

@@ -5,7 +5,27 @@ import (
 )
 
 // MetricOperation is a list of metric operations to use for metric
-type MetricOperation [3]string
+type MetricOperation struct {
+	operations  [3]string
+	LabelNames  []string
+	LabelValues []string
+}
+
+// NewMetricOperationWithLabels  builds and returns new MetricOperation instance with defined label keys
+func NewMetricOperation(operations [3]string, labelNames []string) MetricOperation {
+	labels := []string{"success"}
+	for _, v := range labelNames {
+		labels = append(labels, v)
+	}
+
+	return MetricOperation{operations: operations, LabelNames: labels}
+}
+
+// WithLabels adds label value to existing MetricOperation instance
+func (m *MetricOperation) WithLabels(labels ...string) MetricOperation {
+	m.LabelValues = labels
+	return *m
+}
 
 // Plain struct in an implementation of Bucket interface that produces metric names for given section and operation
 type Plain struct {
@@ -16,8 +36,8 @@ type Plain struct {
 
 // NewPlain builds and returns new Plain instance
 func NewPlain(section string, operation MetricOperation, success, uniDecode bool) *Plain {
-	operationSanitized := make([]string, cap(operation))
-	for k, v := range operation {
+	operationSanitized := make([]string, cap(operation.operations))
+	for k, v := range operation.operations {
 		operationSanitized[k] = SanitizeMetricName(v, uniDecode)
 	}
 	return &Plain{SanitizeMetricName(section, uniDecode), strings.Join(operationSanitized, "."), success}

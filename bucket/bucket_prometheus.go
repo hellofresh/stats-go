@@ -21,8 +21,8 @@ type Prometheus struct {
 
 // NewPrometheus builds and returns new Prometheus instance
 func NewPrometheus(section string, operation MetricOperation, success, uniDecode bool) *Prometheus {
-	operationSanitized := make([]string, cap(operation))
-	for k, v := range operation {
+	operationSanitized := make([]string, cap(operation.operations))
+	for k, v := range operation.operations {
 		operationSanitized[k] = sanitizeMetricName(v, uniDecode)
 
 		// prometheus doesn't allow _ in then end of metric name

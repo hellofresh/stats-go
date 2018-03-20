@@ -15,9 +15,6 @@ type Client interface {
 	// Close closes underlying client connection if any
 	Close() error
 
-	// WithLabels adds labels map to metrics (mostly for Prometheus backend)
-	WithLabels(labels map[string]string) Client
-
 	// TrackRequest tracks HTTP Request stats
 	TrackRequest(r *http.Request, t timer.Timer, success bool) Client
 

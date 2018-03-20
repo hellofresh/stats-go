@@ -11,7 +11,7 @@ type MetricOperation struct {
 	LabelValues []string
 }
 
-// NewMetricOperationWithLabels  builds and returns new MetricOperation instance with defined label keys
+// NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
 func NewMetricOperation(operations [3]string, labelNames []string) MetricOperation {
 	labels := []string{"success"}
 	for _, v := range labelNames {

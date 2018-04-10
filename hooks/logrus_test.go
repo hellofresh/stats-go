@@ -13,7 +13,7 @@ import (
 func TestNewLogrusHook(t *testing.T) {
 	statsClient := client.NewMemory(true)
 	section := "errors"
-	b := bucket.NewPlain(section, bucket.NewMetricOperation([3]string{log.ErrorLevel.String()}, []string{}), true, true)
+	b := bucket.NewPlain(section, bucket.NewMetricOperation(log.ErrorLevel.String()), true, true)
 
 	hook := NewLogrusHook(statsClient, section)
 	log.AddHook(hook)

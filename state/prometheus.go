@@ -60,7 +60,15 @@ func (s *Prometheus) Set(metric string, n int) {
 }
 
 // SetWithLabels sets metric state
-func (s *Prometheus) SetWithLabels(metric string, n int, labelNames, labelValues []string) {
+func (s *Prometheus) SetWithLabels(metric string, n int, labels map[string]string) {
+	var labelNames []string
+	var labelValues []string
+
+	for k, v := range labels {
+		labelNames = append(labelNames, k)
+		labelValues = append(labelValues, v)
+	}
+
 	if s.gauge == nil {
 		s.gauge = s.gaugeFactory.Create(metric, labelNames)
 	}

@@ -6,24 +6,38 @@ import (
 
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation struct {
-	operations  [3]string
-	LabelNames  []string
-	LabelValues []string
+	operations []string
+	Labels     map[string]string
 }
 
 // NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
-func NewMetricOperation(operations [3]string, labelNames []string) MetricOperation {
-	labels := []string{"success"}
-	for _, v := range labelNames {
-		labels = append(labels, v)
-	}
-
-	return MetricOperation{operations: operations, LabelNames: labels}
+func NewMetricOperation(operations ...string) MetricOperation {
+	return MetricOperation{operations: operations}
 }
 
 // WithLabels adds label value to existing MetricOperation instance
-func (m *MetricOperation) WithLabels(labels ...string) MetricOperation {
-	m.LabelValues = labels
+func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
+
+	if m.Labels == nil {
+		m.Labels = labels
+		return *m
+	}
+
+	for k := range m.Labels {
+		m.Labels[k] = ""
+	}
+
+	for k := range labels {
+		if _, ok := m.Labels[k]; !ok {
+			// handle error properly
+			panic("undefined labelName: " + k)
+		} else {
+			if _, ok := labels[k]; ok {
+				m.Labels[k] = labels[k]
+			}
+		}
+	}
+
 	return *m
 }
 

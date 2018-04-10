@@ -18,40 +18,40 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 		Path       string
 		Operations MetricOperation
 	}{
-		{"GET", "/", NewMetricOperation([3]string{"get", MetricEmptyPlaceholder, MetricEmptyPlaceholder}, []string{})},
-		{"TRACE", "/api", NewMetricOperation([3]string{"trace", "api", MetricEmptyPlaceholder}, []string{})},
-		{"TRACE", "/api/", NewMetricOperation([3]string{"trace", "api", MetricEmptyPlaceholder}, []string{})},
-		{"POST", "/api/recipes", NewMetricOperation([3]string{"post", "api", "recipes"}, []string{})},
-		{"POST", "/api/recipes/", NewMetricOperation([3]string{"post", "api", "recipes"}, []string{})},
-		{"DELETE", "/api/recipes/123", NewMetricOperation([3]string{"delete", "api", "recipes"}, []string{})},
-		{"DELETE", "/api/recipes.foo-bar/123", NewMetricOperation([3]string{"delete", "api", "recipes.foo-bar"}, []string{})},
-		{"DELETE", "/api/recipes.foo_bar/123", NewMetricOperation([3]string{"delete", "api", "recipes.foo_bar"}, []string{})},
+		{"GET", "/", NewMetricOperation("get", MetricEmptyPlaceholder, MetricEmptyPlaceholder)},
+		{"TRACE", "/api", NewMetricOperation("trace", "api", MetricEmptyPlaceholder)},
+		{"TRACE", "/api/", NewMetricOperation("trace", "api", MetricEmptyPlaceholder)},
+		{"POST", "/api/recipes", NewMetricOperation("post", "api", "recipes")},
+		{"POST", "/api/recipes/", NewMetricOperation("post", "api", "recipes")},
+		{"DELETE", "/api/recipes/123", NewMetricOperation("delete", "api", "recipes")},
+		{"DELETE", "/api/recipes.foo-bar/123", NewMetricOperation("delete", "api", "recipes.foo-bar")},
+		{"DELETE", "/api/recipes.foo_bar/123", NewMetricOperation("delete", "api", "recipes.foo_bar")},
 		// paths withs IDs at the path second level
-		{"GET", "/user/qwerty", NewMetricOperation([3]string{"get", "user", MetricIDPlaceholder}, []string{})},
-		{"GET", "/users/qwerty", NewMetricOperation([3]string{"get", "users", MetricIDPlaceholder}, []string{})},
-		{"GET", "/allergens/foobarbaz", NewMetricOperation([3]string{"get", "allergens", MetricIDPlaceholder}, []string{})},
-		{"GET", "/cuisines/foobarbaz", NewMetricOperation([3]string{"get", "cuisines", MetricIDPlaceholder}, []string{})},
-		{"GET", "/favorites/foobarbaz", NewMetricOperation([3]string{"get", "favorites", MetricIDPlaceholder}, []string{})},
-		{"GET", "/ingredients/foobarbaz", NewMetricOperation([3]string{"get", "ingredients", MetricIDPlaceholder}, []string{})},
-		{"GET", "/menus/foobarbaz", NewMetricOperation([3]string{"get", "menus", MetricIDPlaceholder}, []string{})},
-		{"GET", "/ratings/foobarbaz", NewMetricOperation([3]string{"get", "ratings", MetricIDPlaceholder}, []string{})},
-		{"GET", "/recipes/foobarbaz", NewMetricOperation([3]string{"get", "recipes", MetricIDPlaceholder}, []string{})},
-		{"GET", "/addresses/foobarbaz", NewMetricOperation([3]string{"get", "addresses", MetricIDPlaceholder}, []string{})},
-		{"GET", "/boxes/foobarbaz", NewMetricOperation([3]string{"get", "boxes", MetricIDPlaceholder}, []string{})},
-		{"GET", "/coupons/foobarbaz", NewMetricOperation([3]string{"get", "coupons", MetricIDPlaceholder}, []string{})},
-		{"GET", "/customers/foobarbaz", NewMetricOperation([3]string{"get", "customers", MetricIDPlaceholder}, []string{})},
-		{"GET", "/delivery_options/foobarbaz", NewMetricOperation([3]string{"get", "delivery_options", MetricIDPlaceholder}, []string{})},
-		{"GET", "/product_families/foobarbaz", NewMetricOperation([3]string{"get", "product_families", MetricIDPlaceholder}, []string{})},
-		{"GET", "/products/foobarbaz", NewMetricOperation([3]string{"get", "products", MetricIDPlaceholder}, []string{})},
-		{"GET", "/recipients/foobarbaz", NewMetricOperation([3]string{"get", "recipients", MetricIDPlaceholder}, []string{})},
+		{"GET", "/user/qwerty", NewMetricOperation("get", "user", MetricIDPlaceholder)},
+		{"GET", "/users/qwerty", NewMetricOperation("get", "users", MetricIDPlaceholder)},
+		{"GET", "/allergens/foobarbaz", NewMetricOperation("get", "allergens", MetricIDPlaceholder)},
+		{"GET", "/cuisines/foobarbaz", NewMetricOperation("get", "cuisines", MetricIDPlaceholder)},
+		{"GET", "/favorites/foobarbaz", NewMetricOperation("get", "favorites", MetricIDPlaceholder)},
+		{"GET", "/ingredients/foobarbaz", NewMetricOperation("get", "ingredients", MetricIDPlaceholder)},
+		{"GET", "/menus/foobarbaz", NewMetricOperation("get", "menus", MetricIDPlaceholder)},
+		{"GET", "/ratings/foobarbaz", NewMetricOperation("get", "ratings", MetricIDPlaceholder)},
+		{"GET", "/recipes/foobarbaz", NewMetricOperation("get", "recipes", MetricIDPlaceholder)},
+		{"GET", "/addresses/foobarbaz", NewMetricOperation("get", "addresses", MetricIDPlaceholder)},
+		{"GET", "/boxes/foobarbaz", NewMetricOperation("get", "boxes", MetricIDPlaceholder)},
+		{"GET", "/coupons/foobarbaz", NewMetricOperation("get", "coupons", MetricIDPlaceholder)},
+		{"GET", "/customers/foobarbaz", NewMetricOperation("get", "customers", MetricIDPlaceholder)},
+		{"GET", "/delivery_options/foobarbaz", NewMetricOperation("get", "delivery_options", MetricIDPlaceholder)},
+		{"GET", "/product_families/foobarbaz", NewMetricOperation("get", "product_families", MetricIDPlaceholder)},
+		{"GET", "/products/foobarbaz", NewMetricOperation("get", "products", MetricIDPlaceholder)},
+		{"GET", "/recipients/foobarbaz", NewMetricOperation("get", "recipients", MetricIDPlaceholder)},
 		// path may have either numeric ID or non-numeric trackable path
-		{"GET", "/subscriptions/12345", NewMetricOperation([3]string{"get", "subscriptions", MetricIDPlaceholder}, []string{})},
-		{"GET", "/subscriptions/search", NewMetricOperation([3]string{"get", "subscriptions", "search"}, []string{})},
-		{"GET", "/freebies/12345", NewMetricOperation([3]string{"get", "freebies", MetricIDPlaceholder}, []string{})},
-		{"GET", "/freebies/search", NewMetricOperation([3]string{"get", "freebies", "search"}, []string{})},
+		{"GET", "/subscriptions/12345", NewMetricOperation("get", "subscriptions", MetricIDPlaceholder)},
+		{"GET", "/subscriptions/search", NewMetricOperation("get", "subscriptions", "search")},
+		{"GET", "/freebies/12345", NewMetricOperation("get", "freebies", MetricIDPlaceholder)},
+		{"GET", "/freebies/search", NewMetricOperation("get", "freebies", "search")},
 		// path may be short or full
-		{"GET", "/clients", NewMetricOperation([3]string{"get", "clients", MetricEmptyPlaceholder}, []string{})},
-		{"GET", "/clients/qwe123", NewMetricOperation([3]string{"get", "clients", MetricIDPlaceholder}, []string{})},
+		{"GET", "/clients", NewMetricOperation("get", "clients", MetricEmptyPlaceholder)},
+		{"GET", "/clients/qwe123", NewMetricOperation("get", "clients", MetricIDPlaceholder)},
 	}
 
 	idConfig := &SecondLevelIDConfig{
@@ -114,19 +114,19 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 
 	for i := uint(0); i < idConfig.AutoDiscoverThreshold-1; i++ {
 		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
-		assert.Equal(t, NewMetricOperation([3]string{"get", firstSectionFoo, uItoA(i)}, []string{}), BuildHTTPRequestMetricOperation(rFoo, callback))
+		assert.Equal(t, NewMetricOperation("get", firstSectionFoo, uItoA(i)), BuildHTTPRequestMetricOperation(rFoo, callback))
 
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
-		assert.Equal(t, NewMetricOperation([3]string{"get", firstSectionBar, uItoA(i)}, []string{}), BuildHTTPRequestMetricOperation(rBar, callback))
+		assert.Equal(t, NewMetricOperation("get", firstSectionBar, uItoA(i)), BuildHTTPRequestMetricOperation(rBar, callback))
 	}
 	assert.Equal(t, uint(0), logErrors+logMessages)
 
 	for i := idConfig.AutoDiscoverThreshold; i < idConfig.AutoDiscoverThreshold+idConfig.AutoDiscoverThreshold; i++ {
 		rFoo := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionFoo, i)}}
-		assert.Equal(t, NewMetricOperation([3]string{"get", firstSectionFoo, MetricIDPlaceholder}, []string{}), BuildHTTPRequestMetricOperation(rFoo, callback))
+		assert.Equal(t, NewMetricOperation("get", firstSectionFoo, MetricIDPlaceholder), BuildHTTPRequestMetricOperation(rFoo, callback))
 
 		rBar := &http.Request{Method: http.MethodGet, URL: &url.URL{Path: fmt.Sprintf("/%s/%v", firstSectionBar, i)}}
-		assert.Equal(t, NewMetricOperation([3]string{"get", firstSectionBar, uItoA(i)}, []string{}), BuildHTTPRequestMetricOperation(rBar, callback))
+		assert.Equal(t, NewMetricOperation("get", firstSectionBar, uItoA(i)), BuildHTTPRequestMetricOperation(rBar, callback))
 	}
 	require.Equal(t, idConfig.AutoDiscoverThreshold, logErrors+logMessages)
 	require.Error(t, logLastError)
@@ -134,7 +134,7 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"method":    "GET",
 		"path":      "/foo/49",
-		"operation": NewMetricOperation([3]string{"get", "foo", "49"}, []string{}),
+		"operation": NewMetricOperation("get", "foo", "49"),
 	}, logLastFields)
 }
 
@@ -145,14 +145,14 @@ func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 		Operations MetricOperation
 		Query      string
 	}{
-		{"GET", "/users/qwerty", NewMetricOperation([3]string{"get", "users", MetricIDPlaceholder}, []string{}), ""},
-		{"GET", "/clients", NewMetricOperation([3]string{"get", "clients", MetricEmptyPlaceholder}, []string{}), ""},
-		{"GET", "/clients/qwe123", NewMetricOperation([3]string{"get", "clients", MetricIDPlaceholder}, []string{}), ""},
-		{"GET", "/token/revoke", NewMetricOperation([3]string{"get", "token", "revoke"}, []string{}), ""},
-		{"GET", "/token/revoke", NewMetricOperation([3]string{"get", "token", "revoke"}, []string{}), "foo=bar&grant_type=baz"},
-		{"GET", "/token", NewMetricOperation([3]string{"get", "token", "baz"}, []string{}), "foo=bar&grant_type=baz"},
-		{"GET", "/token", NewMetricOperation([3]string{"get", "token", MetricEmptyPlaceholder}, []string{}), "foo=bar"},
-		{"GET", "/token/client_credentials", NewMetricOperation([3]string{"get", "token", "client_credentials"}, []string{}), ""},
+		{"GET", "/users/qwerty", NewMetricOperation("get", "users", MetricIDPlaceholder), ""},
+		{"GET", "/clients", NewMetricOperation("get", "clients", MetricEmptyPlaceholder), ""},
+		{"GET", "/clients/qwe123", NewMetricOperation("get", "clients", MetricIDPlaceholder), ""},
+		{"GET", "/token/revoke", NewMetricOperation("get", "token", "revoke"), ""},
+		{"GET", "/token/revoke", NewMetricOperation("get", "token", "revoke"), "foo=bar&grant_type=baz"},
+		{"GET", "/token", NewMetricOperation("get", "token", "baz"), "foo=bar&grant_type=baz"},
+		{"GET", "/token", NewMetricOperation("get", "token", MetricEmptyPlaceholder), "foo=bar"},
+		{"GET", "/token/client_credentials", NewMetricOperation("get", "token", "client_credentials"), ""},
 	}
 
 	callback := func(metricFragments MetricOperation, r *http.Request) MetricOperation {

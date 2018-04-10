@@ -58,7 +58,7 @@ func (m *CounterFactoryMock) Create(metric string, labelKeys []string) CounterVe
 }
 
 func TestPrometheus_Increment(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
@@ -68,7 +68,7 @@ func TestPrometheus_Increment(t *testing.T) {
 }
 
 func TestPrometheus_IncrementWithLabels(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
@@ -78,7 +78,7 @@ func TestPrometheus_IncrementWithLabels(t *testing.T) {
 }
 
 func TestPrometheus_IncrementN(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
@@ -88,7 +88,7 @@ func TestPrometheus_IncrementN(t *testing.T) {
 }
 
 func TestPrometheus_IncrementNWithLabels(t *testing.T) {
-	b := bucket.NewPrometheus("section", bucket.NewMetricOperation([3]string{"o1", "o2", "o3"}, []string{}), true, true)
+	b := bucket.NewPrometheus("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 

@@ -62,7 +62,15 @@ func (i *Prometheus) Increment(metric string) {
 }
 
 // IncrementWithLabels increments metric in prometheus with defined labels
-func (i *Prometheus) IncrementWithLabels(metric string, labelNames, labelValues []string) {
+func (i *Prometheus) IncrementWithLabels(metric string, labels map[string]string) {
+	var labelNames []string
+	var labelValues []string
+
+	for k, v := range labels {
+		labelNames = append(labelNames, k)
+		labelValues = append(labelValues, v)
+	}
+
 	if i.counter == nil {
 		i.counter = i.counterFactory.Create(metric, labelNames)
 	}
@@ -80,7 +88,15 @@ func (i *Prometheus) IncrementN(metric string, n int) {
 }
 
 // IncrementNWithLabels increments metric by n in prometheus with defined labels
-func (i *Prometheus) IncrementNWithLabels(metric string, n int, labelNames, labelValues []string) {
+func (i *Prometheus) IncrementNWithLabels(metric string, n int, labels map[string]string) {
+	var labelNames []string
+	var labelValues []string
+
+	for k, v := range labels {
+		labelNames = append(labelNames, k)
+		labelValues = append(labelValues, v)
+	}
+
 	if i.counter == nil {
 		i.counter = i.counterFactory.Create(metric, labelNames)
 	}

@@ -31,7 +31,7 @@ func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTP
 
 // BuildHTTPRequestMetricOperation builds metric operation from HTTP request
 func BuildHTTPRequestMetricOperation(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {
-	metricParts := NewMetricOperation([3]string{strings.ToLower(r.Method), MetricEmptyPlaceholder, MetricEmptyPlaceholder}, []string{})
+	metricParts := NewMetricOperation(strings.ToLower(r.Method), MetricEmptyPlaceholder, MetricEmptyPlaceholder)
 	if r.URL.Path != "/" {
 		partsFilled := 1
 		for _, fragment := range strings.Split(r.URL.Path, "/") {

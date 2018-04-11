@@ -132,11 +132,11 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	require.Error(t, logLastError)
 	assert.Equal(t, logSuspiciousMetric, logLastMessage)
 	// FIXME
-	//assert.Equal(t, map[string]interface{}{
-	//	"method":    "GET",
-	//	"path":      "/foo/49",
-	//	"operation": NewMetricOperation("get", "foo", "49"),
-	//}, logLastFields)
+	assert.Equal(t, map[string]interface{}{
+		"method":    "GET",
+		"path":      "/foo/49",
+		"operation": NewMetricOperation("get", "foo", "-id-"),
+	}, logLastFields)
 }
 
 func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {

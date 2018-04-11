@@ -12,7 +12,15 @@ type MetricOperation struct {
 
 // NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
 func NewMetricOperation(operations ...string) MetricOperation {
-	return MetricOperation{operations: operations}
+	ops := []string{"-", "-", "-"}
+
+	for i := 0; i < 3; i++ {
+		if len(operations) <= i {
+			break
+		}
+		ops[i] = operations[i]
+	}
+	return MetricOperation{operations: ops}
 }
 
 // WithLabels adds label value to existing MetricOperation instance

@@ -18,6 +18,9 @@ func TestPlain_Metric(t *testing.T) {
 		{"foo", NewMetricOperation("bar", "dot.baz", MetricEmptyPlaceholder), true, "foo.bar.dot_baz.-"},
 		{"foo", NewMetricOperation("bar", "underscore_baz", MetricEmptyPlaceholder), true, "foo.bar.underscore__baz.-"},
 		{"foo.foo", NewMetricOperation("bar", "underscore_baz", MetricEmptyPlaceholder), true, "foo_foo.bar.underscore__baz.-"},
+		{"foo", NewMetricOperation("bar"), true, "foo.bar.-.-"},
+		{"foo", NewMetricOperation("bar", "baz"), true, "foo.bar.baz.-"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz", "vaz"), true, "foo.bar.baz.qaz"},
 	}
 
 	for _, data := range dataProvider {

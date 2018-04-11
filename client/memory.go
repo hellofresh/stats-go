@@ -31,11 +31,6 @@ func NewMemory(unicode bool) *Memory {
 	return client
 }
 
-// WithLabels adds labels map to metrics
-func (c *Memory) WithLabels(labels map[string]string) Client {
-	return c
-}
-
 func (c *Memory) resetMetrics() {
 	c.TimerMetrics = []timer.Metric{}
 	c.CountMetrics = map[string]int{}

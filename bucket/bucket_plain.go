@@ -29,7 +29,7 @@ func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
 
 	for k := range labels {
 		if _, ok := m.Labels[k]; !ok {
-			// handle error properly
+			// TODO: handle error properly
 			panic("undefined labelName: " + k)
 		} else {
 			if _, ok := labels[k]; ok {

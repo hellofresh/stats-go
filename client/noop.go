@@ -21,11 +21,6 @@ func NewNoop(unicode bool) *Noop {
 	return &Noop{unicode: unicode}
 }
 
-// WithLabels adds labels map to metrics
-func (c *Noop) WithLabels(labels map[string]string) Client {
-	return c
-}
-
 // BuildTimer builds timer to track metric timings
 func (c *Noop) BuildTimer() timer.Timer {
 	return &timer.Memory{}

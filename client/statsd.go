@@ -53,11 +53,6 @@ func NewStatsD(addr string, prefix string, unicode bool) (*StatsD, error) {
 	return client, nil
 }
 
-// WithLabels adds labels map to metrics
-func (c *StatsD) WithLabels(labels map[string]string) Client {
-	return c
-}
-
 // BuildTimer builds timer to track metric timings
 func (c *StatsD) BuildTimer() timer.Timer {
 	return timer.NewStatsD(c.client)

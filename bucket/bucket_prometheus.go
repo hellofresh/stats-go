@@ -6,12 +6,6 @@ import (
 	"github.com/fiam/gounidecode/unidecode"
 )
 
-// MetricOperationWithLabels is a struct of metric operations and labels to use for metric
-type MetricOperationWithLabels struct {
-	MetricOperation
-	Labels map[string]string
-}
-
 // Prometheus struct in an implementation of Bucket interface that produces metric names with labels for given section and operation
 type Prometheus struct {
 	section   string

@@ -95,6 +95,4 @@ func TestPrometheus_IncrementNWithLabels(t *testing.T) {
 	i.IncrementWithLabels(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 2, len(m.mock.values))
-	assert.Equal(t, "value1", m.mock.values[0])
-	assert.Equal(t, "value2", m.mock.values[1])
 }

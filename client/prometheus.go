@@ -74,11 +74,10 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 		c.increments[metricTotal] = incrementer.NewPrometheus(incrementer.NewPrometheusCounterFactory())
 	}
 
-	//labelNames := []string{"success", "action"}
-	//labelValues := []string{strconv.FormatBool(success), r.Method}
+	labels := map[string]string{"success": strconv.FormatBool(success), "action": r.Method}
 
-	//c.increments[metric].IncrementWithLabels(metric, labelNames, labelValues)
-	//c.increments[metricTotal].IncrementWithLabels(metricTotal, labelNames, labelValues)
+	c.increments[metric].IncrementWithLabels(metric, labels)
+	c.increments[metricTotal].IncrementWithLabels(metricTotal, labels)
 
 	return c
 }

@@ -30,16 +30,11 @@ func (t *Prometheus) Start() Timer {
 }
 
 // Finish writes elapsed time for metric to prometheus
-func (t *Prometheus) Finish(bucket string) {
-	t.FinishWithLabels(bucket, map[string]string{})
-}
+func (t *Prometheus) Finish(bucket string, labels ...map[string]string) {
+	var keys []string
+	var values []string
 
-// FinishWithLabels writes elapsed time for metric to prometheus
-func (t *Prometheus) FinishWithLabels(bucket string, labels map[string]string) {
-	keys := []string{}
-	values := []string{}
-
-	for key, value := range labels {
+	for key, value := range labels[0] {
 		keys = append(keys, key)
 		values = append(values, value)
 	}

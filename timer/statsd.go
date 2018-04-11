@@ -30,11 +30,6 @@ func (t *StatsD) Start() Timer {
 }
 
 // Finish writes elapsed time for metric to statsd
-func (t *StatsD) Finish(bucket string) {
+func (t *StatsD) Finish(bucket string, labels ...map[string]string) {
 	t.c.Timing(bucket, int(time.Now().Sub(t.timerStart)/time.Millisecond))
-}
-
-// FinishWithLabels writes elapsed time for metric to log
-func (t *StatsD) FinishWithLabels(bucket string, labels map[string]string) {
-	t.Finish(bucket)
 }

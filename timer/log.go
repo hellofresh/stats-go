@@ -24,14 +24,9 @@ func (t *Log) Start() Timer {
 }
 
 // Finish writes elapsed time for metric to log
-func (t *Log) Finish(bucket string) {
+func (t *Log) Finish(bucket string, labels ...map[string]string) {
 	log.Log("Stats timer finished", map[string]interface{}{
 		"bucket":  bucket,
 		"elapsed": time.Now().Sub(t.timerStart).String(),
 	}, nil)
-}
-
-// FinishWithLabels writes elapsed time for metric to log
-func (t *Log) FinishWithLabels(bucket string, labels map[string]string) {
-	t.Finish(bucket)
 }

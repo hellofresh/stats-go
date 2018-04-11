@@ -29,14 +29,9 @@ func (t *Memory) Start() Timer {
 }
 
 // Finish stores elapsed duration in memory
-func (t *Memory) Finish(bucket string) {
+func (t *Memory) Finish(bucket string, labels ...map[string]string) {
 	t.bucket = bucket
 	t.elapsed = time.Now().Sub(t.timerStart)
-}
-
-// FinishWithLabels writes elapsed time for metric to log
-func (t *Memory) FinishWithLabels(bucket string, labels map[string]string) {
-	t.Finish(bucket)
 }
 
 // Elapsed returns elapsed duration

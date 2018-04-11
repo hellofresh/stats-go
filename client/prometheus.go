@@ -93,7 +93,7 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 	c.TrackMetric(section, operation)
 
 	if nil != t {
-		t.FinishWithLabels(b.Metric(), operation.Labels)
+		t.Finish(b.Metric(), operation.Labels)
 	}
 
 	return c
@@ -110,7 +110,7 @@ func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOper
 	c.TrackMetricN(section, operation, n)
 
 	if nil != t {
-		t.FinishWithLabels(b.Metric(), operation.Labels)
+		t.Finish(b.Metric(), operation.Labels)
 	}
 	return c
 }

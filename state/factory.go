@@ -1,6 +1,6 @@
 package state
 
-// StateFactory interface for making new state instances
-type StateFactory interface {
+// Factory interface for making new state instances
+type Factory interface {
 	Create() State
 }

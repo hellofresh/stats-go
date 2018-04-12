@@ -35,7 +35,7 @@ func (i *mockIncrementer) IncrementAllN(b bucket.Bucket, n int) {
 	i.IncrementALlNMethodCalled++
 }
 
-// Mock IncrementerFactory object
+// Mock Factory object
 type mockIncrementerFactory struct {
 	M *mockIncrementer
 
@@ -68,7 +68,7 @@ func (s *mockState) Set(metric string, n int, labels ...map[string]string) {
 	s.SetMethodCalled++
 }
 
-// Mock StateFactory object
+// Mock Factory object
 type mockStateFactory struct {
 	S *mockState
 

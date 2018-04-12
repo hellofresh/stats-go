@@ -5,7 +5,7 @@ type CounterFactory interface {
 	Create(metric string, labelKeys []string) CounterVec
 }
 
-// PrometheusIncrementerFactory interface for making new incrementer instances
-type IncrementerFactory interface {
+// Factory interface for making new incrementer instances
+type Factory interface {
 	Create() Incrementer
 }

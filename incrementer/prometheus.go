@@ -41,7 +41,7 @@ func (f *PrometheusCounterFactory) Create(metric string, labelKeys []string) Cou
 	return p
 }
 
-// PrometheusIncrementerFactory implements IncrementerFactory interface
+// PrometheusIncrementerFactory implements Factory interface
 type PrometheusIncrementerFactory struct{}
 
 // NewPrometheusIncrementerFactory returns new NewPrometheusIncrementerFactory instance

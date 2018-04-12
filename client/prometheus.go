@@ -22,15 +22,15 @@ type Prometheus struct {
 	httpRequestSection string
 
 	namespace  string
-	incFactory incrementer.IncrementerFactory
-	stFactory  state.StateFactory
+	incFactory incrementer.Factory
+	stFactory  state.Factory
 
 	increments map[string]incrementer.Incrementer
 	states     map[string]state.State
 }
 
 // NewPrometheus builds and returns new Prometheus instance
-func NewPrometheus(namespace string, incFactory incrementer.IncrementerFactory, stFactory state.StateFactory) (*Prometheus, error) {
+func NewPrometheus(namespace string, incFactory incrementer.Factory, stFactory state.Factory) (*Prometheus, error) {
 	client := &Prometheus{
 		namespace:  namespace,
 		incFactory: incFactory,

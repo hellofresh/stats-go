@@ -16,12 +16,12 @@ func NewStatsD(c *statsd.Client) *StatsD {
 }
 
 // Increment increments metric in statsd
-func (i *StatsD) Increment(metric string) {
+func (i *StatsD) Increment(metric string, labels ...map[string]string) {
 	i.c.Increment(metric)
 }
 
 // IncrementN increments metric by n in statsd
-func (i *StatsD) IncrementN(metric string, n int) {
+func (i *StatsD) IncrementN(metric string, n int, labels ...map[string]string) {
 	i.c.Count(metric, n)
 }
 

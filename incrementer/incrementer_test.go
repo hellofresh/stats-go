@@ -20,12 +20,12 @@ type mockIncrementer struct {
 	paramsIncrementN []metricN
 }
 
-func (i *mockIncrementer) Increment(metric string) {
+func (i *mockIncrementer) Increment(metric string, labels ...map[string]string) {
 	i.callsIncrement++
 	i.paramsIncrement = append(i.paramsIncrement, metric)
 }
 
-func (i *mockIncrementer) IncrementN(metric string, n int) {
+func (i *mockIncrementer) IncrementN(metric string, n int, labels ...map[string]string) {
 	i.callsIncrementN++
 	i.paramsIncrementN = append(i.paramsIncrementN, metricN{metric, n})
 }

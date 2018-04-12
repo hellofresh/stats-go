@@ -8,7 +8,7 @@ import (
 type Log struct{}
 
 // Set sets metric state
-func (s *Log) Set(metric string, n int) {
+func (s *Log) Set(metric string, n int, labels ...map[string]string) {
 	log.Log("Stats state set", map[string]interface{}{
 		"bucket": metric,
 		"state":  n,

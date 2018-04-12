@@ -72,7 +72,7 @@ func TestPrometheus_IncrementWithLabels(t *testing.T) {
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
-	i.IncrementWithLabels(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
+	i.Increment(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 2, len(m.mock.values))
 }
@@ -92,7 +92,7 @@ func TestPrometheus_IncrementNWithLabels(t *testing.T) {
 	m := &CounterFactoryMock{}
 	i := NewPrometheus(m)
 
-	i.IncrementWithLabels(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
+	i.Increment(b.Metric(), map[string]string{"key1": "value1", "key2": "value2"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 2, len(m.mock.values))
 }

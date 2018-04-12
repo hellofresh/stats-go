@@ -11,7 +11,7 @@ func NewMemory() *Memory {
 }
 
 // Set sets metric state
-func (i *Memory) Set(metric string, n int) {
+func (i *Memory) Set(metric string, n int, labels ...map[string]string) {
 	i.metrics[metric] = n
 }
 

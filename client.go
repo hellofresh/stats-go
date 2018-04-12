@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/hellofresh/stats-go/client"
+	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/state"
 )
 
 const (
@@ -39,7 +41,7 @@ func NewClient(dsn string) (client.Client, error) {
 	case statsD:
 		return client.NewStatsD(dsnURL.Host, strings.Trim(dsnURL.Path, "/"), unicode)
 	case prometheus:
-		return client.NewPrometheus(dsnURL.Host)
+		return client.NewPrometheus(dsnURL.Host, incrementer.NewPrometheusIncrementerFactory(), state.NewPrometheusStateFactory())
 	case log:
 		return client.NewLog(unicode), nil
 	case memory:

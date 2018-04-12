@@ -24,8 +24,7 @@ type GaugeFactory interface {
 }
 
 // PrometheusGaugeFactory implements GaugeFactory interface
-type PrometheusGaugeFactory struct {
-}
+type PrometheusGaugeFactory struct{}
 
 // NewPrometheusGaugeFactory returns new PrometheusGaugeFactory instance
 func NewPrometheusGaugeFactory() *PrometheusGaugeFactory {
@@ -46,31 +45,39 @@ func (f *PrometheusGaugeFactory) Create(metric string, labelKeys []string) Gauge
 	return p
 }
 
+// PrometheusStateFactory implements StateFactory interface
+type PrometheusStateFactory struct{}
+
+// NewPrometheusIncrementerFactory returns new NewPrometheusIncrementerFactory instance
+func NewPrometheusStateFactory() *PrometheusStateFactory {
+	return &PrometheusStateFactory{}
+}
+
+// Create method returns new Prometheus incrementer instance
+func (p *PrometheusStateFactory) Create() State {
+	return NewPrometheus(NewPrometheusGaugeFactory())
+}
+
 // NewPrometheus creates new prometheus state instance
 func NewPrometheus(gaugeFactory GaugeFactory) *Prometheus {
 	return &Prometheus{gauge: nil, gaugeFactory: gaugeFactory}
 }
 
 // Set sets metric state
-func (s *Prometheus) Set(metric string, n int) {
-	if s.gauge == nil {
-		s.gauge = s.gaugeFactory.Create(metric, []string{})
-	}
-	s.gauge.WithLabelValues().Add(float64(n))
-}
-
-// SetWithLabels sets metric state
-func (s *Prometheus) SetWithLabels(metric string, n int, labels map[string]string) {
+func (s *Prometheus) Set(metric string, n int, labels ...map[string]string) {
 	var labelNames []string
 	var labelValues []string
 
-	for k, v := range labels {
-		labelNames = append(labelNames, k)
-		labelValues = append(labelValues, v)
+	if labels != nil {
+		for k, v := range labels[0] {
+			labelNames = append(labelNames, k)
+			labelValues = append(labelValues, v)
+		}
 	}
 
 	if s.gauge == nil {
 		s.gauge = s.gaugeFactory.Create(metric, labelNames)
 	}
+
 	s.gauge.WithLabelValues(labelValues...).Add(float64(n))
 }

@@ -13,6 +13,6 @@ func NewStatsD(c *statsd.Client) *StatsD {
 }
 
 // Set sets metric state
-func (s *StatsD) Set(metric string, n int) {
+func (s *StatsD) Set(metric string, n int, labels ...map[string]string) {
 	s.c.Gauge(metric, n)
 }

@@ -89,7 +89,7 @@ func TestPrometheus_SetWithLabels(t *testing.T) {
 	m := &GaugeFactoryMock{}
 	s := NewPrometheus(m)
 
-	s.SetWithLabels(metric1, metricState1, map[string]string{"key1": "value1"})
+	s.Set(metric1, metricState1, map[string]string{"key1": "value1"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 1, len(m.mock.values))
 	assert.Equal(t, true, m.mock.gaugeMock.addCalled)

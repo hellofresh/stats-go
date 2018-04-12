@@ -19,14 +19,8 @@ type CounterVec interface {
 	With(labels prometheus.Labels) prometheus.Counter
 }
 
-// CounterFactory interface for making new CounterVec instances
-type CounterFactory interface {
-	Create(metric string, labelKeys []string) CounterVec
-}
-
 // PrometheusCounterFactory implements CounterFactory interface
-type PrometheusCounterFactory struct {
-}
+type PrometheusCounterFactory struct{}
 
 // NewPrometheusCounterFactory returns new PrometheusCounterFactory instance
 func NewPrometheusCounterFactory() *PrometheusCounterFactory {
@@ -47,28 +41,34 @@ func (f *PrometheusCounterFactory) Create(metric string, labelKeys []string) Cou
 	return p
 }
 
+// PrometheusIncrementerFactory implements IncrementerFactory interface
+type PrometheusIncrementerFactory struct{}
+
+// NewPrometheusIncrementerFactory returns new NewPrometheusIncrementerFactory instance
+func NewPrometheusIncrementerFactory() *PrometheusIncrementerFactory {
+	return &PrometheusIncrementerFactory{}
+}
+
+// Create method returns new Prometheus incrementer instance
+func (p *PrometheusIncrementerFactory) Create() Incrementer {
+	return NewPrometheus(NewPrometheusCounterFactory())
+}
+
 // NewPrometheus creates new prometheus incrementer instance
 func NewPrometheus(counterFactory CounterFactory) *Prometheus {
 	return &Prometheus{counter: nil, counterFactory: counterFactory}
 }
 
 // Increment increments metric in prometheus
-func (i *Prometheus) Increment(metric string) {
-	if i.counter == nil {
-		i.counter = i.counterFactory.Create(metric, []string{})
-	}
-
-	i.counter.WithLabelValues().Inc()
-}
-
-// IncrementWithLabels increments metric in prometheus with defined labels
-func (i *Prometheus) IncrementWithLabels(metric string, labels map[string]string) {
+func (i *Prometheus) Increment(metric string, labels ...map[string]string) {
 	var labelNames []string
 	var labelValues []string
 
-	for k, v := range labels {
-		labelNames = append(labelNames, k)
-		labelValues = append(labelValues, v)
+	if labels != nil {
+		for k, v := range labels[0] {
+			labelNames = append(labelNames, k)
+			labelValues = append(labelValues, v)
+		}
 	}
 
 	if i.counter == nil {
@@ -79,22 +79,15 @@ func (i *Prometheus) IncrementWithLabels(metric string, labels map[string]string
 }
 
 // IncrementN increments metric by n in prometheus
-func (i *Prometheus) IncrementN(metric string, n int) {
-	if i.counter == nil {
-		i.counter = i.counterFactory.Create(metric, []string{})
-	}
-
-	i.counter.WithLabelValues().Add(float64(n))
-}
-
-// IncrementNWithLabels increments metric by n in prometheus with defined labels
-func (i *Prometheus) IncrementNWithLabels(metric string, n int, labels map[string]string) {
+func (i *Prometheus) IncrementN(metric string, n int, labels ...map[string]string) {
 	var labelNames []string
 	var labelValues []string
 
-	for k, v := range labels {
-		labelNames = append(labelNames, k)
-		labelValues = append(labelValues, v)
+	if labels != nil {
+		for k, v := range labels[0] {
+			labelNames = append(labelNames, k)
+			labelValues = append(labelValues, v)
+		}
 	}
 
 	if i.counter == nil {

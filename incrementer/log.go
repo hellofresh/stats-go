@@ -9,14 +9,14 @@ import (
 type Log struct{}
 
 // Increment writes given metric to log
-func (i *Log) Increment(metric string) {
+func (i *Log) Increment(metric string, labels ...map[string]string) {
 	log.Log("Stats counter incremented", map[string]interface{}{
 		"metric": metric,
 	}, nil)
 }
 
 // IncrementN writes given metric to log
-func (i *Log) IncrementN(metric string, n int) {
+func (i *Log) IncrementN(metric string, n int, labels ...map[string]string) {
 	log.Log("Stats counter incremented by n", map[string]interface{}{
 		"metric": metric,
 		"n":      n,

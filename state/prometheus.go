@@ -48,7 +48,7 @@ func (f *PrometheusGaugeFactory) Create(metric string, labelKeys []string) Gauge
 // PrometheusStateFactory implements Factory interface
 type PrometheusStateFactory struct{}
 
-// NewPrometheusIncrementerFactory returns new NewPrometheusIncrementerFactory instance
+// NewPrometheusStateFactory returns new NewPrometheusIncrementerFactory instance
 func NewPrometheusStateFactory() *PrometheusStateFactory {
 	return &PrometheusStateFactory{}
 }

@@ -44,7 +44,7 @@ func (c *Log) TrackRequest(r *http.Request, t timer.Timer, success bool) Client 
 	if nil != t {
 		t.Finish(b.Metric())
 	}
-	
+
 	i.IncrementAll(b)
 
 	return c

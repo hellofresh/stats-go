@@ -33,9 +33,6 @@ func NewMetricOperation(operations ...string) MetricOperation {
 
 // WithLabels adds label value to existing MetricOperation instance
 func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
-	m.Lock()
-	defer m.Unlock()
-
 	if m.Labels == nil {
 		m.Labels = labels
 		return *m

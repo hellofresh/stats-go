@@ -57,9 +57,6 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
 
-	c.Lock()
-	defer c.Unlock()
-
 	metric = strings.Replace(metric, "-.", "", -1)
 	metric = strings.Replace(metric, ".-", "", -1)
 	metric = strings.Replace(metric, "-", "", -1)
@@ -69,6 +66,9 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 	metricTotal = strings.Replace(metricTotal, ".-", "", -1)
 	metricTotal = strings.Replace(metricTotal, "-", "", -1)
 	metricTotal = strings.Replace(metricTotal, ".", "_", -1)
+
+	c.Lock()
+	defer c.Unlock()
 
 	if _, ok := c.increments[metric]; !ok {
 		c.increments[metric] = c.incFactory.Create()
@@ -110,11 +110,15 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 // TrackOperationN tracks custom operation with n diff
 func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
+
+	c.Lock()
 	if operation.Labels == nil {
 		operation.Labels = map[string]string{"success": strconv.FormatBool(success)}
 	} else {
 		operation.Labels["success"] = strconv.FormatBool(success)
 	}
+	c.Unlock()
+
 	c.TrackMetricN(section, operation, n)
 
 	if nil != t {

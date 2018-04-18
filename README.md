@@ -21,6 +21,7 @@ dashboards to track activity and problems.
 * Several stats backends:
   * `log` for development environment
   * `statsd` for production (with fallback to `log` if statsd server is not available)
+  * `prometheus` for production
   * `memory` for testing purpose, to track stats operations in unit tests
   * `noop` for environments that do not require any stats gathering
 * Fixed metric sections count for all metrics to allow easy monitoring/alerting setup in `grafana`
@@ -59,6 +60,10 @@ func main() {
         // client that tries to connect to statsd service, fallback to debug log backend if fails to connect
         statsdClient, _ := stats.NewClient("statsd://statsd-host:8125/my.app.prefix?unicode=true")
         defer statsdClient.Close()
+	
+	// client for prometheus backend
+        prometheusClient, _ := stats.NewClient("prometheus://your_namespace")
+        defer prometheusClient.Close()
 
         // debug log backend for stats
         logClient, _ := stats.NewClient("log://")
@@ -142,6 +147,9 @@ func main() {
                 // will produce "<prefix>.get.-.-" metric
                 c.JSON(http.StatusOK, "I'm producing stats!")
         })
+	
+	// for prometheus backend we need to expose /metrics endpoint
+	router.GET("/metrics", gin.WrapH(statsClient.Handler()))
 
         router.Run(":8080")
 }

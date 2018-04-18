@@ -14,26 +14,18 @@ type GaugeMock struct {
 	addCalledValue float64
 }
 
-func (c *GaugeMock) Set(float64) {
+func (c *GaugeMock) Set(float64) {}
 
-}
+func (c *GaugeMock) Inc() {}
 
-func (c *GaugeMock) Inc() {
-
-}
-
-func (c *GaugeMock) Dec() {
-
-}
+func (c *GaugeMock) Dec() {}
 
 func (c *GaugeMock) Add(n float64) {
 	c.addCalled = true
 	c.addCalledValue = n
 }
 
-func (c *GaugeMock) Sub(float64) {
-
-}
+func (c *GaugeMock) Sub(float64) {}
 
 type GaugeVecMock struct {
 	withLabelValuesCalls int

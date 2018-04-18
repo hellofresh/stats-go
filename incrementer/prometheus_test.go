@@ -13,17 +13,11 @@ type CounterMock struct {
 	prometheus.Collector
 }
 
-func (c *CounterMock) Set(float64) {
+func (c *CounterMock) Set(float64) {}
 
-}
+func (c *CounterMock) Inc() {}
 
-func (c *CounterMock) Inc() {
-
-}
-
-func (c *CounterMock) Add(float64) {
-
-}
+func (c *CounterMock) Add(float64) {}
 
 type CounterVecMock struct {
 	withLabelValuesCalls int

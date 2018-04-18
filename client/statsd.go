@@ -69,7 +69,9 @@ func (c *StatsD) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	i := incrementer.NewStatsD(c.client)
 
-	t.Finish(b.Metric())
+	if nil != t {
+		t.Finish(b.Metric())
+	}
 	i.IncrementAll(b)
 
 	return c

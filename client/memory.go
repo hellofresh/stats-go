@@ -53,7 +53,10 @@ func (c *Memory) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	i := incrementer.NewMemory()
 
-	t.Finish(b.Metric())
+	if nil != t {
+		t.Finish(b.Metric())
+	}
+
 	if memoryTimer, ok := t.(*timer.Memory); ok {
 		c.TimerMetrics = append(c.TimerMetrics, memoryTimer.Elapsed())
 	}

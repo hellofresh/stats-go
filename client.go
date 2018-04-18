@@ -41,7 +41,7 @@ func NewClient(dsn string) (client.Client, error) {
 	case statsD:
 		return client.NewStatsD(dsnURL.Host, strings.Trim(dsnURL.Path, "/"), unicode)
 	case prometheus:
-		return client.NewPrometheus(dsnURL.Host, incrementer.NewPrometheusIncrementerFactory(), state.NewPrometheusStateFactory())
+		return client.NewPrometheus(dsnURL.Host, incrementer.NewPrometheusIncrementerFactory(), state.NewPrometheusStateFactory()), nil
 	case log:
 		return client.NewLog(unicode), nil
 	case memory:

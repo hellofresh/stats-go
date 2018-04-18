@@ -30,7 +30,7 @@ type Prometheus struct {
 }
 
 // NewPrometheus builds and returns new Prometheus instance
-func NewPrometheus(namespace string, incFactory incrementer.Factory, stFactory state.Factory) (*Prometheus, error) {
+func NewPrometheus(namespace string, incFactory incrementer.Factory, stFactory state.Factory) *Prometheus {
 	client := &Prometheus{
 		namespace:  namespace,
 		incFactory: incFactory,
@@ -38,7 +38,7 @@ func NewPrometheus(namespace string, incFactory incrementer.Factory, stFactory s
 		increments: make(map[string]incrementer.Incrementer),
 		states:     make(map[string]state.State),
 	}
-	return client, nil
+	return client
 }
 
 // BuildTimer builds timer to track metric timings
@@ -91,13 +91,13 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
 
 	c.Lock()
-	defer c.Unlock()
-
 	if operation.Labels == nil {
 		operation.Labels = map[string]string{"success": strconv.FormatBool(success)}
 	} else {
 		operation.Labels["success"] = strconv.FormatBool(success)
 	}
+	c.Unlock()
+
 	c.TrackMetric(section, operation)
 
 	if nil != t {

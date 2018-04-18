@@ -121,26 +121,26 @@ func (t *mockTimer) Finish(bucket string, labels ...map[string]string) {
 // Tests block begin
 
 func TestPrometheusClient_NewPrometheus(t *testing.T) {
-	p, _ := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
+	p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
 	assert.IsType(t, &Prometheus{}, p)
 }
 
 func TestPrometheusClient_BuildTimer(t *testing.T) {
-	p, _ := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
+	p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
 	tt := p.BuildTimer()
 	_, ok := tt.(*timer.Prometheus)
 	assert.True(t, ok)
 }
 
 func TestPrometheusClient_Close(t *testing.T) {
-	p, _ := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
+	p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
 	tt := p.Close()
 	assert.Nil(t, tt)
 }
 
 func TestPrometheusClient_TrackMetric(t *testing.T) {
 	m := newMockIncrementerFactory()
-	p, _ := NewPrometheus("namespace", m, newMockStateFactory())
+	p := NewPrometheus("namespace", m, newMockStateFactory())
 	p.TrackMetric("section", bucket.NewMetricOperation("foo", "bar", "baz"))
 	assert.Equal(t, 2, m.CreateMethodCalled)
 	assert.Equal(t, 2, m.M.IncrementMethodCalled)
@@ -148,7 +148,7 @@ func TestPrometheusClient_TrackMetric(t *testing.T) {
 
 func TestPrometheusClient_TrackMetricIncrementsAlreadyExists(t *testing.T) {
 	m := newMockIncrementerFactory()
-	p, _ := NewPrometheus("namespace", m, newMockStateFactory())
+	p := NewPrometheus("namespace", m, newMockStateFactory())
 	p.TrackMetric("section", bucket.NewMetricOperation("foo", "bar", "baz"))
 	p.TrackMetric("section", bucket.NewMetricOperation("foo", "bar", "baz"))
 
@@ -161,7 +161,7 @@ func TestPrometheusClient_TrackMetricIncrementsAlreadyExists(t *testing.T) {
 
 func TestPrometheusClient_TrackMetricN(t *testing.T) {
 	m := newMockIncrementerFactory()
-	p, _ := NewPrometheus("namespace", m, newMockStateFactory())
+	p := NewPrometheus("namespace", m, newMockStateFactory())
 	p.TrackMetricN("section", bucket.NewMetricOperation("foo", "bar", "baz"), 999)
 
 	assert.Equal(t, 2, m.CreateMethodCalled)
@@ -174,7 +174,7 @@ func TestPrometheusClient_TrackMetricN(t *testing.T) {
 func TestPrometheusClient_TrackState(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 	p.TrackState("section", bucket.NewMetricOperation("foo", "bar", "baz"), 888)
 	assert.Equal(t, 1, s.CreateMethodCalled)
 	assert.Equal(t, 1, s.S.SetMethodCalled)
@@ -183,7 +183,7 @@ func TestPrometheusClient_TrackState(t *testing.T) {
 func TestPrometheusClient_TrackStateAlreadyExists(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 	p.TrackState("section", bucket.NewMetricOperation("foo", "bar", "baz"), 888)
 	p.TrackState("section", bucket.NewMetricOperation("foo", "bar", "baz"), 888)
 	assert.Equal(t, 1, s.CreateMethodCalled)
@@ -193,7 +193,7 @@ func TestPrometheusClient_TrackStateAlreadyExists(t *testing.T) {
 func TestPrometheusClient_TrackOperation(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, true)
 
@@ -206,7 +206,7 @@ func TestPrometheusClient_TrackOperationWithTimer(t *testing.T) {
 	s := newMockStateFactory()
 	mockedTimer := newMockTimer()
 
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), mockedTimer, true)
 
@@ -218,7 +218,7 @@ func TestPrometheusClient_TrackOperationWithTimer(t *testing.T) {
 func TestPrometheusClient_TrackOperationAlreadyExists(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, true)
 	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, false)
@@ -230,7 +230,7 @@ func TestPrometheusClient_TrackOperationAlreadyExists(t *testing.T) {
 func TestPrometheusClient_TrackOperationN(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, 999, true)
 
@@ -243,7 +243,7 @@ func TestPrometheusClient_TrackOperationNWithTimer(t *testing.T) {
 	s := newMockStateFactory()
 	mockedTimer := newMockTimer()
 
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), mockedTimer, 999, true)
 
@@ -255,7 +255,7 @@ func TestPrometheusClient_TrackOperationNWithTimer(t *testing.T) {
 func TestPrometheusClient_TrackOperationNAlreadyExists(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	p, _ := NewPrometheus("namespace", m, s)
+	p := NewPrometheus("namespace", m, s)
 
 	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, 1, true)
 	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), nil, 2, false)

@@ -21,6 +21,8 @@ const (
 	MetricEmptyPlaceholder = "-"
 	// MetricIDPlaceholder is a string placeholder for ID section of operation if any
 	MetricIDPlaceholder = "-id-"
+	// MetricOperationsMaxLength is maximum number of operations allowed in one bucket
+	MetricOperationsMaxLength = 3
 )
 
 var operationsStatus = map[bool]string{true: suffixStatusOk, false: suffixStatusFail}

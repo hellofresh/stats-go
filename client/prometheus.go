@@ -53,14 +53,13 @@ func (c *Prometheus) Close() error {
 
 // TrackRequest tracks HTTP Request stats
 func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) Client {
-	c.Lock()
-	defer c.Unlock()
-
 	b := bucket.NewHTTPRequest(c.httpRequestSection, r, success, c.httpMetricCallback, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
 
-	// need to do smth with that
+	c.Lock()
+	defer c.Unlock()
+
 	metric = strings.Replace(metric, "-.", "", -1)
 	metric = strings.Replace(metric, ".-", "", -1)
 	metric = strings.Replace(metric, "-", "", -1)
@@ -90,6 +89,10 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 // TrackOperation tracks custom operation
 func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
+
+	c.Lock()
+	defer c.Unlock()
+
 	if operation.Labels == nil {
 		operation.Labels = map[string]string{"success": strconv.FormatBool(success)}
 	} else {
@@ -122,12 +125,12 @@ func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOper
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
 func (c *Prometheus) TrackMetric(section string, operation bucket.MetricOperation) Client {
-	c.Lock()
-	defer c.Unlock()
-
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
+
+	c.Lock()
+	defer c.Unlock()
 
 	if _, ok := c.increments[metric]; !ok {
 		c.increments[metric] = c.incFactory.Create()
@@ -144,12 +147,12 @@ func (c *Prometheus) TrackMetric(section string, operation bucket.MetricOperatio
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
 func (c *Prometheus) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
-	c.Lock()
-	defer c.Unlock()
-
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
+
+	c.Lock()
+	defer c.Unlock()
 
 	if _, ok := c.increments[metric]; !ok {
 		c.increments[metric] = c.incFactory.Create()
@@ -166,11 +169,11 @@ func (c *Prometheus) TrackMetricN(section string, operation bucket.MetricOperati
 
 // TrackState tracks metric absolute value
 func (c *Prometheus) TrackState(section string, operation bucket.MetricOperation, value int) Client {
-	c.Lock()
-	defer c.Unlock()
-
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
+
+	c.Lock()
+	defer c.Unlock()
 
 	if _, ok := c.states[metric]; !ok {
 		c.states[metric] = c.stFactory.Create()
@@ -192,9 +195,6 @@ func (c *Prometheus) SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCa
 
 // GetHTTPMetricCallback gets callback handler that allows metric operation alteration for HTTP Request
 func (c *Prometheus) GetHTTPMetricCallback() bucket.HTTPMetricNameAlterCallback {
-	c.Lock()
-	defer c.Unlock()
-
 	return c.httpMetricCallback
 }
 

@@ -2,29 +2,39 @@ package bucket
 
 import (
 	"strings"
+	"sync"
 )
 
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation struct {
+	sync.Mutex
+
 	operations []string
 	Labels     map[string]string
 }
 
 // NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
 func NewMetricOperation(operations ...string) MetricOperation {
-	ops := []string{"-", "-", "-"}
+	ops := []string{MetricEmptyPlaceholder, MetricEmptyPlaceholder, MetricEmptyPlaceholder}
 
-	for i := 0; i < 3; i++ {
-		if len(operations) <= i {
-			break
+	opsLen := len(operations)
+	switch {
+	case opsLen >= MetricOperationsMaxLength:
+		ops[0] = operations[0]
+		ops[1] = operations[1]
+		ops[2] = operations[2]
+	case opsLen < 3:
+		for i := 0; i < opsLen; i++ {
+			ops[i] = operations[i]
 		}
-		ops[i] = operations[i]
 	}
 	return MetricOperation{operations: ops}
 }
 
 // WithLabels adds label value to existing MetricOperation instance
 func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
+	m.Lock()
+	defer m.Unlock()
 
 	if m.Labels == nil {
 		m.Labels = labels
@@ -38,7 +48,6 @@ func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
 	for k := range labels {
 		if _, ok := m.Labels[k]; !ok {
 			// TODO: handle error properly
-			panic("undefined labelName: " + k)
 		} else {
 			if _, ok := labels[k]; ok {
 				m.Labels[k] = labels[k]

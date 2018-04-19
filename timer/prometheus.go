@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -8,6 +9,8 @@ import (
 
 // Prometheus struct is Timer interface implementation that writes all timings
 type Prometheus struct {
+	sync.Mutex
+
 	timerStart    time.Time
 	histogramVecs map[string]*prometheus.HistogramVec
 }
@@ -38,6 +41,9 @@ func (t *Prometheus) Finish(bucket string, labels ...map[string]string) {
 		keys = append(keys, key)
 		values = append(values, value)
 	}
+
+	t.Lock()
+	defer t.Unlock()
 
 	duration := time.Since(t.timerStart)
 

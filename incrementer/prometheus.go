@@ -1,12 +1,16 @@
 package incrementer
 
 import (
+	"sync"
+
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Prometheus struct is Incrementer interface implementation that writes all metrics to Prometheus
 type Prometheus struct {
+	sync.Mutex
+
 	counter        CounterVec
 	counterFactory CounterFactory
 }
@@ -71,6 +75,9 @@ func (i *Prometheus) Increment(metric string, labels ...map[string]string) {
 		}
 	}
 
+	i.Lock()
+	defer i.Unlock()
+
 	if i.counter == nil {
 		i.counter = i.counterFactory.Create(metric, labelNames)
 	}
@@ -89,6 +96,9 @@ func (i *Prometheus) IncrementN(metric string, n int, labels ...map[string]strin
 			labelValues = append(labelValues, v)
 		}
 	}
+
+	i.Lock()
+	defer i.Unlock()
 
 	if i.counter == nil {
 		i.counter = i.counterFactory.Create(metric, labelNames)

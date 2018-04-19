@@ -1,11 +1,15 @@
 package state
 
 import (
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Prometheus struct is State interface implementation that writes all states
 type Prometheus struct {
+	sync.Mutex
+
 	gauge        GaugeVec
 	gaugeFactory GaugeFactory
 }
@@ -74,6 +78,9 @@ func (s *Prometheus) Set(metric string, n int, labels ...map[string]string) {
 			labelValues = append(labelValues, v)
 		}
 	}
+
+	s.Lock()
+	defer s.Unlock()
 
 	if s.gauge == nil {
 		s.gauge = s.gaugeFactory.Create(metric, labelNames)

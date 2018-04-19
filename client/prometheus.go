@@ -90,13 +90,11 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
 
-	c.Lock()
 	if operation.Labels == nil {
 		operation.Labels = map[string]string{"success": strconv.FormatBool(success)}
 	} else {
 		operation.Labels["success"] = strconv.FormatBool(success)
 	}
-	c.Unlock()
 
 	c.TrackMetric(section, operation)
 
@@ -111,13 +109,11 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
 
-	c.Lock()
 	if operation.Labels == nil {
 		operation.Labels = map[string]string{"success": strconv.FormatBool(success)}
 	} else {
 		operation.Labels["success"] = strconv.FormatBool(success)
 	}
-	c.Unlock()
 
 	c.TrackMetricN(section, operation, n)
 

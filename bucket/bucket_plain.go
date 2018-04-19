@@ -2,13 +2,10 @@ package bucket
 
 import (
 	"strings"
-	"sync"
 )
 
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation struct {
-	sync.Mutex
-
 	operations []string
 	Labels     map[string]string
 }

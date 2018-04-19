@@ -27,6 +27,8 @@ func (c *GaugeMock) Add(n float64) {
 
 func (c *GaugeMock) Sub(float64) {}
 
+func (c *GaugeMock) SetToCurrentTime() {}
+
 type GaugeVecMock struct {
 	withLabelValuesCalls int
 	values               []string

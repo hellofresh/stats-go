@@ -6,6 +6,7 @@ import (
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/log"
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 )
@@ -28,7 +29,7 @@ func NewLog(unicode bool) *Log {
 
 // BuildTimer builds timer to track metric timings
 func (c *Log) BuildTimer() timer.Timer {
-	return &timer.Log{}
+	return &timer.Memory{}
 }
 
 // Close statsd connection
@@ -42,7 +43,10 @@ func (c *Log) TrackRequest(r *http.Request, t timer.Timer, success bool) Client 
 	i := &incrementer.Log{}
 
 	if nil != t {
-		t.Finish(b.Metric())
+		log.Log("Stats timer finished", map[string]interface{}{
+			"bucket":  b.Metric(),
+			"elapsed": t.Finish().String(),
+		}, nil)
 	}
 
 	i.IncrementAll(b)
@@ -56,7 +60,10 @@ func (c *Log) TrackOperation(section string, operation bucket.MetricOperation, t
 	i := &incrementer.Log{}
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
+		log.Log("Stats timer finished", map[string]interface{}{
+			"bucket":  b.MetricWithSuffix(),
+			"elapsed": t.Finish().String(),
+		}, nil)
 	}
 	i.IncrementAll(b)
 
@@ -69,7 +76,10 @@ func (c *Log) TrackOperationN(section string, operation bucket.MetricOperation, 
 	i := &incrementer.Log{}
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
+		log.Log("Stats timer finished", map[string]interface{}{
+			"bucket":  b.MetricWithSuffix(),
+			"elapsed": t.Finish().String(),
+		}, nil)
 	}
 	i.IncrementAllN(b, n)
 

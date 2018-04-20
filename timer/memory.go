@@ -2,18 +2,9 @@ package timer
 
 import "time"
 
-// Metric is a type for storing single duration metric
-type Metric struct {
-	Bucket  string
-	Elapsed time.Duration
-}
-
 // Memory struct is Timer interface implementation that stores results in memory for further usage
 type Memory struct {
 	timerStart time.Time
-
-	bucket  string
-	elapsed time.Duration
 }
 
 // StartAt starts timer at a given time
@@ -28,13 +19,7 @@ func (t *Memory) Start() Timer {
 	return t
 }
 
-// Finish stores elapsed duration in memory
-func (t *Memory) Finish(bucket string) {
-	t.bucket = bucket
-	t.elapsed = time.Now().Sub(t.timerStart)
-}
-
-// Elapsed returns elapsed duration
-func (t *Memory) Elapsed() Metric {
-	return Metric{t.bucket, t.elapsed}
+// Finish returns elapsed duration
+func (t *Memory) Finish() time.Duration {
+	return time.Now().Sub(t.timerStart)
 }

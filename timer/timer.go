@@ -8,6 +8,6 @@ type Timer interface {
 	Start() Timer
 	// StartAt starts timer at a given time
 	StartAt(time.Time) Timer
-	// Finish writes elapsed time for metric
-	Finish(bucket string)
+	// Finish returns elapsed time
+	Finish() time.Duration
 }

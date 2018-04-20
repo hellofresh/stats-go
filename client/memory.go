@@ -3,12 +3,19 @@ package client
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 )
+
+// Metric is a type for storing single duration metric
+type Metric struct {
+	Bucket  string
+	Elapsed time.Duration
+}
 
 // Memory is Client implementation for tests
 type Memory struct {
@@ -17,7 +24,7 @@ type Memory struct {
 	httpRequestSection string
 	unicode            bool
 
-	TimerMetrics []timer.Metric
+	TimerMetrics []Metric
 	CountMetrics map[string]int
 	StateMetrics map[string]int
 }
@@ -32,7 +39,7 @@ func NewMemory(unicode bool) *Memory {
 }
 
 func (c *Memory) resetMetrics() {
-	c.TimerMetrics = []timer.Metric{}
+	c.TimerMetrics = []Metric{}
 	c.CountMetrics = map[string]int{}
 	c.StateMetrics = map[string]int{}
 }
@@ -54,11 +61,7 @@ func (c *Memory) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 	i := incrementer.NewMemory()
 
 	if nil != t {
-		t.Finish(b.Metric())
-	}
-
-	if memoryTimer, ok := t.(*timer.Memory); ok {
-		c.TimerMetrics = append(c.TimerMetrics, memoryTimer.Elapsed())
+		c.TimerMetrics = append(c.TimerMetrics, Metric{Bucket: b.Metric(), Elapsed: t.Finish()})
 	}
 
 	i.IncrementAll(b)
@@ -75,10 +78,7 @@ func (c *Memory) TrackOperation(section string, operation bucket.MetricOperation
 	i := incrementer.NewMemory()
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
-		if memoryTimer, ok := t.(*timer.Memory); ok {
-			c.TimerMetrics = append(c.TimerMetrics, memoryTimer.Elapsed())
-		}
+		c.TimerMetrics = append(c.TimerMetrics, Metric{Bucket: b.MetricWithSuffix(), Elapsed: t.Finish()})
 	}
 
 	i.IncrementAll(b)
@@ -95,10 +95,7 @@ func (c *Memory) TrackOperationN(section string, operation bucket.MetricOperatio
 	i := incrementer.NewMemory()
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
-		if memoryTimer, ok := t.(*timer.Memory); ok {
-			c.TimerMetrics = append(c.TimerMetrics, memoryTimer.Elapsed())
-		}
+		c.TimerMetrics = append(c.TimerMetrics, Metric{Bucket: b.MetricWithSuffix(), Elapsed: t.Finish()})
 	}
 
 	i.IncrementAllN(b, n)

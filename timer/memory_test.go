@@ -8,13 +8,9 @@ import (
 )
 
 func TestMemoryTimeTracker(t *testing.T) {
-	bucket := "test-bucket"
-
 	tt := &Memory{}
 	tt.Start()
-	tt.Finish(bucket)
+	d := tt.Finish()
 
-	metric := tt.Elapsed()
-	assert.Equal(t, bucket, metric.Bucket)
-	assert.True(t, metric.Elapsed > time.Duration(0))
+	assert.True(t, d > time.Duration(0))
 }

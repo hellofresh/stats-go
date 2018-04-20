@@ -6,7 +6,7 @@ import (
 )
 
 // HTTPMetricNameAlterCallback is a type for HTTP Request metric alter handler
-type HTTPMetricNameAlterCallback func(metricParts MetricOperation, r *http.Request) MetricOperation
+type HTTPMetricNameAlterCallback func(metricParts *MetricOperation, r *http.Request) *MetricOperation
 
 // HTTPRequest struct in an implementation of Bucket interface that produces metric names for HTTP Request.
 // Metrics has the following formats for methods:
@@ -30,7 +30,7 @@ func NewHTTPRequest(section string, r *http.Request, success bool, callback HTTP
 }
 
 // BuildHTTPRequestMetricOperation builds metric operation from HTTP request
-func BuildHTTPRequestMetricOperation(r *http.Request, callback HTTPMetricNameAlterCallback) MetricOperation {
+func BuildHTTPRequestMetricOperation(r *http.Request, callback HTTPMetricNameAlterCallback) *MetricOperation {
 	metricParts := NewMetricOperation(strings.ToLower(r.Method), MetricEmptyPlaceholder, MetricEmptyPlaceholder)
 	if r.URL.Path != "/" {
 		partsFilled := 1

@@ -9,7 +9,7 @@ import (
 func TestPrometheus_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
@@ -50,7 +50,7 @@ func BenchmarkPrometheus_MetricTotal(b *testing.B) {
 func TestPrometheus_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{

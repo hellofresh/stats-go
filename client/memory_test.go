@@ -168,7 +168,7 @@ func TestMemoryClient_TrackState(t *testing.T) {
 
 func TestMemoryClient_SetHTTPMetricCallback(t *testing.T) {
 	client := NewMemory(true)
-	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
+	callback := func(metricParts *bucket.MetricOperation, r *http.Request) *bucket.MetricOperation {
 		return metricParts
 	}
 

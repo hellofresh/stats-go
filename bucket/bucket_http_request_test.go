@@ -16,7 +16,7 @@ func TestHttpRequest_BuildHTTPRequestMetricOperation(t *testing.T) {
 	dataProvider := []struct {
 		Method     string
 		Path       string
-		Operations MetricOperation
+		Operations *MetricOperation
 	}{
 		{"GET", "/", NewMetricOperation("get", MetricEmptyPlaceholder, MetricEmptyPlaceholder)},
 		{"TRACE", "/api", NewMetricOperation("trace", "api", MetricEmptyPlaceholder)},
@@ -143,7 +143,7 @@ func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 	dataProvider := []struct {
 		Method     string
 		Path       string
-		Operations MetricOperation
+		Operations *MetricOperation
 		Query      string
 	}{
 		{"GET", "/users/qwerty", NewMetricOperation("get", "users", MetricIDPlaceholder), ""},
@@ -156,7 +156,7 @@ func TestHttpRequest_MetricNameAlterCallback(t *testing.T) {
 		{"GET", "/token/client_credentials", NewMetricOperation("get", "token", "client_credentials"), ""},
 	}
 
-	callback := func(metricFragments MetricOperation, r *http.Request) MetricOperation {
+	callback := func(metricFragments *MetricOperation, r *http.Request) *MetricOperation {
 		if metricFragments.operations[1] == "token" && metricFragments.operations[2] != "revoke" {
 			grantType := r.URL.Query().Get("grant_type")
 			if grantType != "" {

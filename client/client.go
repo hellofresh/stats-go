@@ -19,19 +19,19 @@ type Client interface {
 	TrackRequest(r *http.Request, t timer.Timer, success bool) Client
 
 	// TrackOperation tracks custom operation
-	TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client
+	TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client
 
 	// TrackOperationN tracks custom operation with n diff
-	TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client
+	TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client
 
 	// TrackMetric tracks custom metric, w/out ok/fail additional sections
-	TrackMetric(section string, operation bucket.MetricOperation) Client
+	TrackMetric(section string, operation *bucket.MetricOperation) Client
 
 	// TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-	TrackMetricN(section string, operation bucket.MetricOperation, n int) Client
+	TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client
 
 	// TrackState tracks metric absolute value
-	TrackState(section string, operation bucket.MetricOperation, value int) Client
+	TrackState(section string, operation *bucket.MetricOperation, value int) Client
 
 	// SetHTTPMetricCallback sets callback handler that allows metric operation alteration for HTTP Request
 	SetHTTPMetricCallback(callback bucket.HTTPMetricNameAlterCallback) Client

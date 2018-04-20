@@ -11,7 +11,7 @@ type MetricOperation struct {
 }
 
 // NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
-func NewMetricOperation(operations ...string) MetricOperation {
+func NewMetricOperation(operations ...string) *MetricOperation {
 	ops := []string{MetricEmptyPlaceholder, MetricEmptyPlaceholder, MetricEmptyPlaceholder}
 
 	opsLen := len(operations)
@@ -25,14 +25,15 @@ func NewMetricOperation(operations ...string) MetricOperation {
 			ops[i] = operations[i]
 		}
 	}
-	return MetricOperation{operations: ops}
+	return &MetricOperation{operations: ops}
 }
 
 // WithLabels adds label value to existing MetricOperation instance
-func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
+func (m *MetricOperation) WithLabels(labels map[string]string) *MetricOperation {
+
 	if m.Labels == nil {
 		m.Labels = labels
-		return *m
+		return m
 	}
 
 	for k := range m.Labels {
@@ -49,7 +50,7 @@ func (m *MetricOperation) WithLabels(labels map[string]string) MetricOperation {
 		}
 	}
 
-	return *m
+	return m
 }
 
 // Plain struct in an implementation of Bucket interface that produces metric names for given section and operation
@@ -60,7 +61,7 @@ type Plain struct {
 }
 
 // NewPlain builds and returns new Plain instance
-func NewPlain(section string, operation MetricOperation, success, uniDecode bool) *Plain {
+func NewPlain(section string, operation *MetricOperation, success, uniDecode bool) *Plain {
 	operationSanitized := make([]string, cap(operation.operations))
 	for k, v := range operation.operations {
 		operationSanitized[k] = SanitizeMetricName(v, uniDecode)

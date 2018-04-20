@@ -103,7 +103,7 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 }
 
 // TrackOperation tracks custom operation
-func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *Prometheus) TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
 
 	if operation.Labels == nil {
@@ -122,7 +122,7 @@ func (c *Prometheus) TrackOperation(section string, operation bucket.MetricOpera
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *Prometheus) TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPrometheus(section, operation, success, c.unicode)
 
 	if operation.Labels == nil {
@@ -140,7 +140,7 @@ func (c *Prometheus) TrackOperationN(section string, operation bucket.MetricOper
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *Prometheus) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *Prometheus) TrackMetric(section string, operation *bucket.MetricOperation) Client {
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
@@ -154,7 +154,7 @@ func (c *Prometheus) TrackMetric(section string, operation bucket.MetricOperatio
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *Prometheus) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *Prometheus) TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client {
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
@@ -168,7 +168,7 @@ func (c *Prometheus) TrackMetricN(section string, operation bucket.MetricOperati
 }
 
 // TrackState tracks metric absolute value
-func (c *Prometheus) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *Prometheus) TrackState(section string, operation *bucket.MetricOperation, value int) Client {
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 

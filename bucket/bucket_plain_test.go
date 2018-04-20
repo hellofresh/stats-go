@@ -9,7 +9,7 @@ import (
 func TestPlain_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
@@ -74,7 +74,7 @@ func BenchmarkPlain_MetricTotalWithSuffix(b *testing.B) {
 func TestPlain_MetricWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
@@ -91,7 +91,7 @@ func TestPlain_MetricWithSuffix(t *testing.T) {
 func TestPlain_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
@@ -108,7 +108,7 @@ func TestPlain_MetricTotal(t *testing.T) {
 func TestPlain_MetricTotalWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{

@@ -11,7 +11,7 @@ import (
 
 func TestNewLogClient_SetHTTPMetricCallback(t *testing.T) {
 	client := NewLog(true)
-	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
+	callback := func(metricParts *bucket.MetricOperation, r *http.Request) *bucket.MetricOperation {
 		return metricParts
 	}
 

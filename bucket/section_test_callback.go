@@ -109,7 +109,7 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 		}
 	}
 
-	return func(operation MetricOperation, r *http.Request) MetricOperation {
+	return func(operation *MetricOperation, r *http.Request) *MetricOperation {
 		firstFragment := "/"
 		for _, fragment := range strings.Split(r.URL.Path, "/") {
 			if fragment != "" {

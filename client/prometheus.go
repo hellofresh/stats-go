@@ -51,29 +51,32 @@ func (c *Prometheus) Close() error {
 	return nil
 }
 
-// buildIncrement calls incrementer factory if incrementer was not created before
-func (c *Prometheus) buildIncrement(metric, metricTotal string) {
+// getIncrementer calls incrementer factory if incrementer was not created before
+func (c *Prometheus) getIncrementer(name string) incrementer.Incrementer {
 	c.Lock()
 	defer c.Unlock()
 
-	if _, ok := c.increments[metric]; !ok {
-		c.increments[metric] = c.incFactory.Create()
+	increment, ok := c.increments[name]
+	if !ok {
+		increment = c.incFactory.Create()
+		c.increments[name] = increment
 	}
 
-	if _, ok := c.increments[metricTotal]; !ok {
-		c.increments[metricTotal] = c.incFactory.Create()
-	}
-
+	return increment
 }
 
-// buildState calls state factory if state objects was not created before
-func (c *Prometheus) buildState(metric string) {
+// getState calls state factory if state objects was not created before
+func (c *Prometheus) getState(name string) state.State {
 	c.Lock()
 	defer c.Unlock()
 
-	if _, ok := c.states[metric]; !ok {
-		c.states[metric] = c.stFactory.Create()
+	st, ok := c.states[name]
+	if !ok {
+		st = c.stFactory.Create()
+		c.states[name] = st
 	}
+
+	return st
 }
 
 // TrackRequest tracks HTTP Request stats
@@ -92,12 +95,13 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 	metricTotal = strings.Replace(metricTotal, "-", "", -1)
 	metricTotal = strings.Replace(metricTotal, ".", "_", -1)
 
-	c.buildIncrement(metric, metricTotal)
+	metricInc := c.getIncrementer(metric)
+	metricTotalInc := c.getIncrementer(metricTotal)
 
 	labels := map[string]string{"success": strconv.FormatBool(success), "action": r.Method}
 
-	c.increments[metric].Increment(metric, labels)
-	c.increments[metricTotal].Increment(metricTotal, labels)
+	metricInc.Increment(metric, labels)
+	metricTotalInc.Increment(metricTotal, labels)
 
 	return c
 }
@@ -145,10 +149,11 @@ func (c *Prometheus) TrackMetric(section string, operation *bucket.MetricOperati
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
 
-	c.buildIncrement(metric, metricTotal)
+	metricInc := c.getIncrementer(metric)
+	metricTotalInc := c.getIncrementer(metricTotal)
 
-	c.increments[metric].Increment(metric, operation.Labels)
-	c.increments[metricTotal].Increment(metricTotal, operation.Labels)
+	metricInc.Increment(metric, operation.Labels)
+	metricTotalInc.Increment(metricTotal, operation.Labels)
 
 	return c
 }
@@ -159,10 +164,11 @@ func (c *Prometheus) TrackMetricN(section string, operation *bucket.MetricOperat
 	metric := b.Metric()
 	metricTotal := b.MetricTotal()
 
-	c.buildIncrement(metric, metricTotal)
+	metricInc := c.getIncrementer(metric)
+	metricTotalInc := c.getIncrementer(metricTotal)
 
-	c.increments[metric].IncrementN(metric, n, operation.Labels)
-	c.increments[metricTotal].IncrementN(metricTotal, n, operation.Labels)
+	metricInc.IncrementN(metric, n, operation.Labels)
+	metricTotalInc.IncrementN(metricTotal, n, operation.Labels)
 
 	return c
 }
@@ -172,9 +178,9 @@ func (c *Prometheus) TrackState(section string, operation *bucket.MetricOperatio
 	b := bucket.NewPrometheus(section, operation, true, c.unicode)
 	metric := b.Metric()
 
-	c.buildState(metric)
+	st := c.getState(metric)
 
-	c.states[metric].Set(metric, value, operation.Labels)
+	st.Set(metric, value, operation.Labels)
 
 	return c
 }

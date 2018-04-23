@@ -94,30 +94,7 @@ ordersInLast24h := orderService.Count(time.Duration(24)*time.Hour)
 statsClient.TrackState("ordering", operations, ordersInLast24h)
 ```
 
-### Track requests metrics with middleware, e.g. for [Gin Web Framework](https://github.com/gin-gonic/gin)
-
-```go
-package middleware
-
-import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"github.com/hellofresh/stats-go/client"
-)
-
-// NewStatsRequest returns a middleware handler function.
-func NewStatsRequest(sc client.Client) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		timing := sc.BuildTimer().Start()
-
-		c.Next()
-
-		success := c.Writer.Status() < http.StatusBadRequest
-		sc.TrackRequest(c.Request, timing, success)
-	}
-}
-```
+### Track requests metrics with middleware
 
 ```go
 package main
@@ -126,24 +103,24 @@ import (
         "net/http"
         "os"
 
-        "github.com/example/app/middleware"
-        "github.com/gin-gonic/gin"
+        "github.com/go-chi/chi"
         "github.com/hellofresh/stats-go"
+        "github.com/hellofresh/stats-go/middleware"
 )
 
 func main() {
         statsClient := stats.NewClient(os.Getenv("STATS_DSN"))
         defer statsClient.Close()
 
-        router := gin.Default()
-        router.Use(middleware.NewStatsRequest(statsClient))
+        r := chi.NewRouter()
+        r.Use(middleware.New(statsClient))
 
-        router.GET("/", func(c *gin.Context) {
+        r.GET("/", func(c *gin.Context) {
                 // will produce "<prefix>.get.-.-" metric
                 c.JSON(http.StatusOK, "I'm producing stats!")
         })
 
-        router.Run(":8080")
+        http.ListenAndServe(":8080", r)
 }
 ```
 

@@ -37,7 +37,7 @@ func TestContext(t *testing.T) {
 }
 
 func testSetContext(t *testing.T) {
-	statsClient := client.NewNoop(false)
+	statsClient := client.NewNoop()
 
 	ctx := context.Background()
 	ctx = New(ctx, statsClient)
@@ -47,7 +47,7 @@ func testSetContext(t *testing.T) {
 }
 
 func testGetFromContextSuccess(t *testing.T) {
-	statsClient := client.NewNoop(false)
+	statsClient := client.NewNoop()
 
 	ctx := context.Background()
 	ctx = New(ctx, statsClient)

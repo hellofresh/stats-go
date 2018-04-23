@@ -19,7 +19,7 @@ func New(ctx context.Context, client client.Client) context.Context {
 func WithContext(ctx context.Context) client.Client {
 	ctxStats, ok := ctx.Value(statsKey).(client.Client)
 	if !ok {
-		return client.NewNoop(true)
+		return client.NewNoop()
 	}
 
 	return ctxStats

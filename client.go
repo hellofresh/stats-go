@@ -41,7 +41,7 @@ func NewClient(dsn string) (client.Client, error) {
 	case memory:
 		return client.NewMemory(unicode), nil
 	case noop:
-		return client.NewNoop(unicode), nil
+		return client.NewNoop(), nil
 	}
 
 	return nil, ErrUnknownClient

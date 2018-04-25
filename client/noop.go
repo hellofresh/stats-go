@@ -12,13 +12,12 @@ import (
 type Noop struct {
 	sync.Mutex
 
-	unicode            bool
 	httpMetricCallback bucket.HTTPMetricNameAlterCallback
 }
 
 // NewNoop builds and returns new Noop instance
-func NewNoop(unicode bool) *Noop {
-	return &Noop{unicode: unicode}
+func NewNoop() *Noop {
+	return &Noop{}
 }
 
 // BuildTimer builds timer to track metric timings

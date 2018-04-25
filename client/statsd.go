@@ -3,6 +3,7 @@ package client
 import (
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
@@ -55,7 +56,7 @@ func NewStatsD(addr string, prefix string, unicode bool) (*StatsD, error) {
 
 // BuildTimer builds timer to track metric timings
 func (c *StatsD) BuildTimer() timer.Timer {
-	return timer.NewStatsD(c.client)
+	return &timer.Memory{}
 }
 
 // Close statsd connection
@@ -70,7 +71,7 @@ func (c *StatsD) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 	i := incrementer.NewStatsD(c.client)
 
 	if nil != t {
-		t.Finish(b.Metric())
+		c.client.Timing(b.Metric(), int(t.Finish()/time.Millisecond))
 	}
 	i.IncrementAll(b)
 
@@ -83,7 +84,7 @@ func (c *StatsD) TrackOperation(section string, operation *bucket.MetricOperatio
 	i := incrementer.NewStatsD(c.client)
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
+		c.client.Timing(b.MetricWithSuffix(), int(t.Finish()/time.Millisecond))
 	}
 	i.IncrementAll(b)
 
@@ -96,7 +97,7 @@ func (c *StatsD) TrackOperationN(section string, operation *bucket.MetricOperati
 	i := incrementer.NewStatsD(c.client)
 
 	if nil != t {
-		t.Finish(b.MetricWithSuffix())
+		c.client.Timing(b.MetricWithSuffix(), int(t.Finish()/time.Millisecond))
 	}
 	i.IncrementAllN(b, n)
 

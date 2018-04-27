@@ -26,32 +26,10 @@
   revision = "8deddbd03fec2c28969266e52f27b6fb22be1823"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/gin-contrib/sse"
-  packages = ["."]
-  revision = "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae"
-
-[[projects]]
-  name = "github.com/gin-gonic/gin"
-  packages = [
-    ".",
-    "binding",
-    "render"
-  ]
-  revision = "d459835d2b077e44f7c9b453505ee29881d5d12d"
-  version = "v1.2"
-
-[[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/mattn/go-isatty"
-  packages = ["."]
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -114,12 +92,6 @@
   version = "v1.1.4"
 
 [[projects]]
-  name = "github.com/ugorji/go"
-  packages = ["codec"]
-  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
-  version = "v1.1.1"
-
-[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -140,21 +112,9 @@
   revision = "7fea3f0d2fab1ad973e641e51dba45443a311a90"
   version = "v2.0.0"
 
-[[projects]]
-  name = "gopkg.in/go-playground/validator.v8"
-  packages = ["."]
-  revision = "5f1438d3fca68893a817e4a66806cea46a9e4ebf"
-  version = "v8.18.2"
-
-[[projects]]
-  name = "gopkg.in/yaml.v2"
-  packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e5e1af28e481892c41fc46c9ec74ae0abbeb00f31742536844742ff19de66241"
+  inputs-digest = "c521fc14cf069443c2435a060a21a095cd8fdacfc1bf43e1f52858eb59474fae"
   solver-name = "gps-cdcl"
   solver-version = 1

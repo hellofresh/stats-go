@@ -2,10 +2,13 @@ package bucket
 
 import (
 	"strings"
+	"sync"
 )
 
 // MetricOperation is a list of metric operations to use for metric
 type MetricOperation struct {
+	sync.Mutex
+
 	operations []string
 	Labels     map[string]string
 }
@@ -39,6 +42,9 @@ func (m *MetricOperation) WithLabels(labels map[string]string) *MetricOperation 
 	for k := range m.Labels {
 		m.Labels[k] = ""
 	}
+
+	m.Lock()
+	defer m.Unlock()
 
 	for k := range labels {
 		if _, ok := m.Labels[k]; !ok {

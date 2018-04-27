@@ -89,7 +89,7 @@ func main() {
 import "github.com/hellofresh/stats-go/bucket"
 
 timing := statsClient.BuildTimer().Start()
-operation := bucket.MetricOperation{"orders", "order", "create"}
+operation := bucket.NewMetricOperation("orders", "order", "create")
 err := orderService.Create(...)
 statsClient.TrackOperation("ordering", operation, timing, err == nil)
 
@@ -242,7 +242,7 @@ const sectionStatsFoo = "foo"
 
 func DoSomeJob(statsClient client.Client) error {
         tt := statsClient.BuildTimer().Start()
-        operation := bucket.MetricOperation{"do", "some", "job"}
+	operation := bucket.NewMetricOperation("do", "some", "job")
 
         result, err := doSomeRealJobHere()
         statsClient.TrackOperation(sectionStatsFoo, operation, tt, result)

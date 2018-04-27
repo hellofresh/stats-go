@@ -11,5 +11,4 @@ type Timer interface {
 	// Finish returns elapsed time
 	Finish() time.Duration
 	// Finish writes elapsed time for metric
-	Finish(bucket string, labels ...map[string]string)
 }

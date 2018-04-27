@@ -2,12 +2,10 @@ package client
 
 import (
 	"testing"
-	"time"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
 	"github.com/hellofresh/stats-go/state"
-	"github.com/hellofresh/stats-go/timer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,35 +87,6 @@ func (m *mockStateFactory) Create() state.State {
 	return m.S
 }
 
-// Mock Timer object
-type mockTimer struct {
-	StartMethodCalled   int
-	StartAtMethodCalled int
-	FinishMethodCalled  int
-}
-
-func newMockTimer() *mockTimer {
-	return &mockTimer{
-		StartMethodCalled:   0,
-		StartAtMethodCalled: 0,
-		FinishMethodCalled:  0,
-	}
-}
-
-func (t *mockTimer) Start() timer.Timer {
-	t.StartMethodCalled++
-	return t
-}
-
-func (t *mockTimer) StartAt(time.Time) timer.Timer {
-	t.StartAtMethodCalled++
-	return t
-}
-
-func (t *mockTimer) Finish(bucket string, labels ...map[string]string) {
-	t.FinishMethodCalled++
-}
-
 // Tests block begin
 
 func TestPrometheusClient_NewPrometheus(t *testing.T) {
@@ -126,10 +95,10 @@ func TestPrometheusClient_NewPrometheus(t *testing.T) {
 }
 
 func TestPrometheusClient_BuildTimer(t *testing.T) {
-	p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
-	tt := p.BuildTimer()
-	_, ok := tt.(*timer.Prometheus)
-	assert.True(t, ok)
+	//p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
+	//tt := p.BuildTimer()
+	//_, ok := tt.(*timer.Prometheus)
+	//assert.True(t, ok)
 }
 
 func TestPrometheusClient_Close(t *testing.T) {
@@ -204,15 +173,19 @@ func TestPrometheusClient_TrackOperation(t *testing.T) {
 func TestPrometheusClient_TrackOperationWithTimer(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	mockedTimer := newMockTimer()
 
 	p := NewPrometheus("namespace", m, s)
 
-	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), mockedTimer, true)
+	timer := p.BuildTimer()
+
+	p.TrackOperation("section", bucket.NewMetricOperation("foo", "bar", "baz"), timer, true)
 
 	assert.Equal(t, 2, m.CreateMethodCalled)
-	assert.Equal(t, 1, mockedTimer.FinishMethodCalled)
 	assert.Equal(t, 2, m.M.IncrementMethodCalled)
+	assert.NotNil(t, p.histograms["section_foo_bar_baz"])
+
+	_, err := p.histograms["section_foo_bar_baz"].GetMetricWithLabelValues("true")
+	assert.Nil(t, err)
 }
 
 func TestPrometheusClient_TrackOperationAlreadyExists(t *testing.T) {
@@ -241,15 +214,20 @@ func TestPrometheusClient_TrackOperationN(t *testing.T) {
 func TestPrometheusClient_TrackOperationNWithTimer(t *testing.T) {
 	m := newMockIncrementerFactory()
 	s := newMockStateFactory()
-	mockedTimer := newMockTimer()
 
 	p := NewPrometheus("namespace", m, s)
 
-	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), mockedTimer, 999, true)
+	timer := p.BuildTimer()
+
+	p.TrackOperationN("section", bucket.NewMetricOperation("foo", "bar", "baz"), timer, 999, true)
 
 	assert.Equal(t, 2, m.CreateMethodCalled)
-	assert.Equal(t, 1, mockedTimer.FinishMethodCalled)
 	assert.Equal(t, 2, m.M.IncrementNMethodCalled)
+	assert.NotNil(t, p.histograms["section_foo_bar_baz"])
+
+	_, err := p.histograms["section_foo_bar_baz"].GetMetricWithLabelValues("true")
+	assert.Nil(t, err)
+
 }
 
 func TestPrometheusClient_TrackOperationNAlreadyExists(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
@@ -27,6 +28,7 @@ type Prometheus struct {
 
 	increments map[string]incrementer.Incrementer
 	states     map[string]state.State
+	histograms map[string]*prometheus.HistogramVec
 }
 
 // NewPrometheus builds and returns new Prometheus instance
@@ -37,13 +39,14 @@ func NewPrometheus(namespace string, incFactory incrementer.Factory, stFactory s
 		stFactory:  stFactory,
 		increments: make(map[string]incrementer.Incrementer),
 		states:     make(map[string]state.State),
+		histograms: make(map[string]*prometheus.HistogramVec),
 	}
 	return client
 }
 
 // BuildTimer builds timer to track metric timings
 func (c *Prometheus) BuildTimer() timer.Timer {
-	return timer.NewPrometheus()
+	return &timer.Memory{}
 }
 
 // Close closes underlying client connection if any
@@ -77,6 +80,29 @@ func (c *Prometheus) getState(name string) state.State {
 	}
 
 	return st
+}
+
+// getHistogram creates new histogram instance from prometheus library if it was not created before or gets existing
+func (c *Prometheus) getHistogram(name string, labels ...map[string]string) *prometheus.HistogramVec {
+	var keys []string
+	var values []string
+
+	for key, value := range labels[0] {
+		keys = append(keys, key)
+		values = append(values, value)
+	}
+
+	c.Lock()
+	defer c.Unlock()
+
+	if _, ok := c.histograms[name]; !ok {
+		c.histograms[name] = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Name: name + "_seconds",
+			Help: " ",
+		}, keys)
+		prometheus.Register(c.histograms[name])
+	}
+	return c.histograms[name]
 }
 
 // TrackRequest tracks HTTP Request stats
@@ -119,7 +145,13 @@ func (c *Prometheus) TrackOperation(section string, operation *bucket.MetricOper
 	c.TrackMetric(section, operation)
 
 	if nil != t {
-		t.Finish(b.Metric(), operation.Labels)
+		var values []string
+
+		h := c.getHistogram(b.Metric(), operation.Labels)
+		for _, value := range operation.Labels {
+			values = append(values, value)
+		}
+		h.WithLabelValues(values...).Observe(float64(t.Finish() / time.Millisecond))
 	}
 
 	return c
@@ -138,8 +170,15 @@ func (c *Prometheus) TrackOperationN(section string, operation *bucket.MetricOpe
 	c.TrackMetricN(section, operation, n)
 
 	if nil != t {
-		t.Finish(b.Metric(), operation.Labels)
+		var values []string
+
+		h := c.getHistogram(b.Metric(), operation.Labels)
+		for _, value := range operation.Labels {
+			values = append(values, value)
+		}
+		h.WithLabelValues(values...).Observe(float64(t.Finish() / time.Millisecond))
 	}
+
 	return c
 }
 

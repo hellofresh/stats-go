@@ -6,6 +6,7 @@ import (
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/incrementer"
 	"github.com/hellofresh/stats-go/state"
+	"github.com/hellofresh/stats-go/timer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -95,10 +96,10 @@ func TestPrometheusClient_NewPrometheus(t *testing.T) {
 }
 
 func TestPrometheusClient_BuildTimer(t *testing.T) {
-	//p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
-	//tt := p.BuildTimer()
-	//_, ok := tt.(*timer.Prometheus)
-	//assert.True(t, ok)
+	p := NewPrometheus("namespace", newMockIncrementerFactory(), newMockStateFactory())
+	tt := p.BuildTimer()
+	_, ok := tt.(*timer.Memory)
+	assert.True(t, ok)
 }
 
 func TestPrometheusClient_Close(t *testing.T) {

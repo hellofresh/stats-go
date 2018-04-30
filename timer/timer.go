@@ -10,5 +10,4 @@ type Timer interface {
 	StartAt(time.Time) Timer
 	// Finish returns elapsed time
 	Finish() time.Duration
-	// Finish writes elapsed time for metric
 }

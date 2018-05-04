@@ -48,7 +48,7 @@ func TestMemoryClient_TrackOperation(t *testing.T) {
 
 	tt := client.BuildTimer()
 	section := "test-section"
-	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	operation := bucket.NewMetricOperation("01", "02", "o3")
 	success := true
 	b := bucket.NewPlain(section, operation, success, true)
 
@@ -74,7 +74,7 @@ func TestMemoryClient_TrackOperationN(t *testing.T) {
 
 	tt := client.BuildTimer()
 	section := "test-section"
-	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	operation := bucket.NewMetricOperation("01", "02", "o3")
 	success := true
 	n := 5
 	b := bucket.NewPlain(section, operation, success, true)
@@ -100,7 +100,7 @@ func TestMemoryClient_TrackMetric(t *testing.T) {
 	client := NewMemory(true)
 
 	section := "test-section"
-	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	operation := bucket.NewMetricOperation("01", "02", "o3")
 	b := bucket.NewPlain(section, operation, true, true)
 
 	client.TrackMetric(section, operation)
@@ -123,7 +123,7 @@ func TestMemoryClient_TrackMetricN(t *testing.T) {
 	client := NewMemory(true)
 
 	section := "test-section"
-	operation := bucket.MetricOperation{"o1", "o2", "o3"}
+	operation := bucket.NewMetricOperation("01", "02", "o3")
 	n := 5
 	b := bucket.NewPlain(section, operation, true, true)
 
@@ -147,8 +147,8 @@ func TestMemoryClient_TrackState(t *testing.T) {
 	client := NewMemory(true)
 
 	section := "test-section"
-	operation1 := bucket.MetricOperation{"o1", "o2", "o3"}
-	operation2 := bucket.MetricOperation{"p1", "p2", "p3"}
+	operation1 := bucket.NewMetricOperation("01", "02", "o3")
+	operation2 := bucket.NewMetricOperation("p1", "p2", "p3")
 	state1 := 13
 	state2 := 66
 	state12 := 77
@@ -168,7 +168,7 @@ func TestMemoryClient_TrackState(t *testing.T) {
 
 func TestMemoryClient_SetHTTPMetricCallback(t *testing.T) {
 	client := NewMemory(true)
-	callback := func(metricParts bucket.MetricOperation, r *http.Request) bucket.MetricOperation {
+	callback := func(metricParts *bucket.MetricOperation, r *http.Request) *bucket.MetricOperation {
 		return metricParts
 	}
 

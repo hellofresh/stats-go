@@ -7,10 +7,10 @@ import (
 // Incrementer is a metric incrementer interface
 type Incrementer interface {
 	// Increment increments metric
-	Increment(metric string)
+	Increment(metric string, labels ...map[string]string)
 
 	// IncrementN increments metric by n
-	IncrementN(metric string, n int)
+	IncrementN(metric string, n int, labels ...map[string]string)
 
 	// Increment increments all metrics for given bucket
 	IncrementAll(b bucket.Bucket)

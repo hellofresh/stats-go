@@ -9,15 +9,18 @@ import (
 func TestPlain_Metric(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, true, "foo.bar.baz.qaz"},
-		{"foo", MetricOperation{"bar", "baz", MetricEmptyPlaceholder}, true, "foo.bar.baz.-"},
-		{"foo", MetricOperation{"bar", "dot.baz", MetricEmptyPlaceholder}, true, "foo.bar.dot_baz.-"},
-		{"foo", MetricOperation{"bar", "underscore_baz", MetricEmptyPlaceholder}, true, "foo.bar.underscore__baz.-"},
-		{"foo.foo", MetricOperation{"bar", "underscore_baz", MetricEmptyPlaceholder}, true, "foo_foo.bar.underscore__baz.-"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), true, "foo.bar.baz.qaz"},
+		{"foo", NewMetricOperation("bar", "baz", MetricEmptyPlaceholder), true, "foo.bar.baz.-"},
+		{"foo", NewMetricOperation("bar", "dot.baz", MetricEmptyPlaceholder), true, "foo.bar.dot_baz.-"},
+		{"foo", NewMetricOperation("bar", "underscore_baz", MetricEmptyPlaceholder), true, "foo.bar.underscore__baz.-"},
+		{"foo.foo", NewMetricOperation("bar", "underscore_baz", MetricEmptyPlaceholder), true, "foo_foo.bar.underscore__baz.-"},
+		{"foo", NewMetricOperation("bar"), true, "foo.bar.-.-"},
+		{"foo", NewMetricOperation("bar", "baz"), true, "foo.bar.baz.-"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz", "vaz"), true, "foo.bar.baz.qaz"},
 	}
 
 	for _, data := range dataProvider {
@@ -27,42 +30,42 @@ func TestPlain_Metric(t *testing.T) {
 }
 
 func BenchmarkNewPlain(b *testing.B) {
-	operation := MetricOperation{"bar", "baz", "qaz"}
+	operation := NewMetricOperation("bar", "baz", "qaz")
 	for n := 0; n < b.N; n++ {
 		NewPlain("foo", operation, true, false)
 	}
 }
 
 func BenchmarkNewPlain_unicode(b *testing.B) {
-	operation := MetricOperation{"bar", "baz", "qaz"}
+	operation := NewMetricOperation("bar", "baz", "qaz")
 	for n := 0; n < b.N; n++ {
 		NewPlain("foo", operation, true, true)
 	}
 }
 
 func BenchmarkPlain_Metric(b *testing.B) {
-	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	bucket := NewPlain("foo", NewMetricOperation("bar", "baz", "qaz"), true, false)
 	for n := 0; n < b.N; n++ {
 		bucket.Metric()
 	}
 }
 
 func BenchmarkPlain_MetricWithSuffix(b *testing.B) {
-	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	bucket := NewPlain("foo", NewMetricOperation("bar", "baz", "qaz"), true, false)
 	for n := 0; n < b.N; n++ {
 		bucket.MetricWithSuffix()
 	}
 }
 
 func BenchmarkPlain_MetricTotal(b *testing.B) {
-	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	bucket := NewPlain("foo", NewMetricOperation("bar", "baz", "qaz"), true, false)
 	for n := 0; n < b.N; n++ {
 		bucket.MetricTotal()
 	}
 }
 
 func BenchmarkPlain_MetricTotalWithSuffix(b *testing.B) {
-	bucket := NewPlain("foo", MetricOperation{"bar", "baz", "qaz"}, true, false)
+	bucket := NewPlain("foo", NewMetricOperation("bar", "baz", "qaz"), true, false)
 	for n := 0; n < b.N; n++ {
 		bucket.MetricTotalWithSuffix()
 	}
@@ -71,12 +74,12 @@ func BenchmarkPlain_MetricTotalWithSuffix(b *testing.B) {
 func TestPlain_MetricWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, true, "foo-ok.bar.baz.qaz"},
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, false, "foo-fail.bar.baz.qaz"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), true, "foo-ok.bar.baz.qaz"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), false, "foo-fail.bar.baz.qaz"},
 	}
 
 	for _, data := range dataProvider {
@@ -88,12 +91,12 @@ func TestPlain_MetricWithSuffix(t *testing.T) {
 func TestPlain_MetricTotal(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, true, "total.foo"},
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, false, "total.foo"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), true, "total.foo"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), false, "total.foo"},
 	}
 
 	for _, data := range dataProvider {
@@ -105,12 +108,12 @@ func TestPlain_MetricTotal(t *testing.T) {
 func TestPlain_MetricTotalWithSuffix(t *testing.T) {
 	dataProvider := []struct {
 		Section   string
-		Operation MetricOperation
+		Operation *MetricOperation
 		Success   bool
 		Metric    string
 	}{
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, true, "total.foo-ok"},
-		{"foo", MetricOperation{"bar", "baz", "qaz"}, false, "total.foo-fail"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), true, "total.foo-ok"},
+		{"foo", NewMetricOperation("bar", "baz", "qaz"), false, "total.foo-fail"},
 	}
 
 	for _, data := range dataProvider {

@@ -79,7 +79,7 @@ func (c *StatsD) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 }
 
 // TrackOperation tracks custom operation
-func (c *StatsD) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *StatsD) TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := incrementer.NewStatsD(c.client)
 
@@ -92,7 +92,7 @@ func (c *StatsD) TrackOperation(section string, operation bucket.MetricOperation
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *StatsD) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *StatsD) TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := incrementer.NewStatsD(c.client)
 
@@ -105,7 +105,7 @@ func (c *StatsD) TrackOperationN(section string, operation bucket.MetricOperatio
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *StatsD) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *StatsD) TrackMetric(section string, operation *bucket.MetricOperation) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := incrementer.NewStatsD(c.client)
 
@@ -116,7 +116,7 @@ func (c *StatsD) TrackMetric(section string, operation bucket.MetricOperation) C
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *StatsD) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *StatsD) TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := incrementer.NewStatsD(c.client)
 
@@ -127,7 +127,7 @@ func (c *StatsD) TrackMetricN(section string, operation bucket.MetricOperation, 
 }
 
 // TrackState tracks metric absolute value
-func (c *StatsD) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *StatsD) TrackState(section string, operation *bucket.MetricOperation, value int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	s := state.NewStatsD(c.client)
 
@@ -165,4 +165,11 @@ func (c *StatsD) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *StatsD) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *StatsD) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

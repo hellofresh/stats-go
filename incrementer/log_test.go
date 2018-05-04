@@ -36,7 +36,7 @@ func TestLog(t *testing.T) {
 	logMessages = make([]string, 0)
 	logFields = make([]map[string]interface{}, 0)
 
-	bb := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	bb := bucket.NewPlain("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	i.IncrementAll(bb)
 
 	assert.Equal(t, 4, len(logMessages))

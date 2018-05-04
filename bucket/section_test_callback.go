@@ -109,7 +109,7 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 		}
 	}
 
-	return func(operation MetricOperation, r *http.Request) MetricOperation {
+	return func(operation *MetricOperation, r *http.Request) *MetricOperation {
 		firstFragment := "/"
 		for _, fragment := range strings.Split(r.URL.Path, "/") {
 			if fragment != "" {
@@ -119,19 +119,19 @@ func NewHasIDAtSecondLevelCallback(config *SecondLevelIDConfig) HTTPMetricNameAl
 		}
 
 		if testFunction, ok := config.HasIDAtSecondLevel[PathSection(firstFragment)]; ok {
-			if testFunction.Callback(PathSection(operation[2])) {
-				operation[2] = MetricIDPlaceholder
+			if testFunction.Callback(PathSection(operation.operations[2])) {
+				operation.operations[2] = MetricIDPlaceholder
 			}
 		} else if config.AutoDiscoverThreshold > 0 {
 			if _, ok := config.autoDiscoverWhiteMap[firstFragment]; !ok {
-				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation[2]) {
+				if config.autoDiscoverStorage.LooksLikeID(firstFragment, operation.operations[2]) {
 					log.Log("Second level ID auto-discover found suspicious metric", map[string]interface{}{
 						"method":    r.Method,
 						"path":      r.URL.Path,
 						"operation": operation,
 					}, ErrLooksLikeID)
 
-					operation[2] = MetricIDPlaceholder
+					operation.operations[2] = MetricIDPlaceholder
 				}
 			}
 		}

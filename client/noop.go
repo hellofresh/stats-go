@@ -36,27 +36,27 @@ func (c *Noop) TrackRequest(r *http.Request, t timer.Timer, success bool) Client
 }
 
 // TrackOperation tracks custom operation
-func (c *Noop) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *Noop) TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client {
 	return c
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *Noop) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *Noop) TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	return c
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *Noop) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *Noop) TrackMetric(section string, operation *bucket.MetricOperation) Client {
 	return c
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *Noop) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *Noop) TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client {
 	return c
 }
 
 // TrackState tracks metric absolute value
-func (c *Noop) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *Noop) TrackState(section string, operation *bucket.MetricOperation, value int) Client {
 	return c
 }
 
@@ -85,4 +85,11 @@ func (c *Noop) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Noop) ResetHTTPRequestSection() Client {
 	return c
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Noop) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

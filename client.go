@@ -7,11 +7,15 @@ import (
 	"strings"
 
 	"github.com/hellofresh/stats-go/client"
+	"github.com/hellofresh/stats-go/incrementer"
+	"github.com/hellofresh/stats-go/state"
 )
 
 const (
 	// StatsD is a dsn scheme value for statsd client
 	statsD = "statsd"
+	// prometheus is a dsn scheme value for prometheus client
+	prometheus = "prometheus"
 	// Log is a dsn scheme value for log client
 	log = "log"
 	// Memory is a dsn scheme value for memory client
@@ -36,6 +40,8 @@ func NewClient(dsn string) (client.Client, error) {
 	switch dsnURL.Scheme {
 	case statsD:
 		return client.NewStatsD(dsnURL.Host, strings.Trim(dsnURL.Path, "/"), unicode)
+	case prometheus:
+		return client.NewPrometheus(dsnURL.Host, incrementer.NewPrometheusIncrementerFactory(), state.NewPrometheusStateFactory()), nil
 	case log:
 		return client.NewLog(unicode), nil
 	case memory:

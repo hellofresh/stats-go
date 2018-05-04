@@ -20,12 +20,12 @@ type mockIncrementer struct {
 	paramsIncrementN []metricN
 }
 
-func (i *mockIncrementer) Increment(metric string) {
+func (i *mockIncrementer) Increment(metric string, labels ...map[string]string) {
 	i.callsIncrement++
 	i.paramsIncrement = append(i.paramsIncrement, metric)
 }
 
-func (i *mockIncrementer) IncrementN(metric string, n int) {
+func (i *mockIncrementer) IncrementN(metric string, n int, labels ...map[string]string) {
 	i.callsIncrementN++
 	i.paramsIncrementN = append(i.paramsIncrementN, metricN{metric, n})
 }
@@ -39,7 +39,7 @@ func (i *mockIncrementer) IncrementAllN(b bucket.Bucket, n int) {
 }
 
 func Test_incrementAll(t *testing.T) {
-	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPlain("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 
 	i := &mockIncrementer{}
 	i.IncrementAll(b)
@@ -52,7 +52,7 @@ func Test_incrementAll(t *testing.T) {
 }
 
 func Test_incrementAllN(t *testing.T) {
-	b := bucket.NewPlain("section", bucket.MetricOperation{"o1", "o2", "o3"}, true, true)
+	b := bucket.NewPlain("section", bucket.NewMetricOperation("o1", "o2", "o3"), true, true)
 	n := 42
 
 	i := &mockIncrementer{}

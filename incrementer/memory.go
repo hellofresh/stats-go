@@ -13,12 +13,12 @@ func NewMemory() *Memory {
 }
 
 // Increment increments given metric in memory
-func (i *Memory) Increment(metric string) {
+func (i *Memory) Increment(metric string, labels ...map[string]string) {
 	i.metrics[metric]++
 }
 
 // IncrementN increments given metric in memory
-func (i *Memory) IncrementN(metric string, n int) {
+func (i *Memory) IncrementN(metric string, n int, labels ...map[string]string) {
 	i.metrics[metric] += n
 }
 

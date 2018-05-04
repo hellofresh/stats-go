@@ -73,7 +73,7 @@ func (c *Memory) TrackRequest(r *http.Request, t timer.Timer, success bool) Clie
 }
 
 // TrackOperation tracks custom operation
-func (c *Memory) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *Memory) TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, true)
 	i := incrementer.NewMemory()
 
@@ -90,7 +90,7 @@ func (c *Memory) TrackOperation(section string, operation bucket.MetricOperation
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *Memory) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *Memory) TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, true)
 	i := incrementer.NewMemory()
 
@@ -107,7 +107,7 @@ func (c *Memory) TrackOperationN(section string, operation bucket.MetricOperatio
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *Memory) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *Memory) TrackMetric(section string, operation *bucket.MetricOperation) Client {
 	b := bucket.NewPlain(section, operation, true, true)
 	i := incrementer.NewMemory()
 
@@ -121,7 +121,7 @@ func (c *Memory) TrackMetric(section string, operation bucket.MetricOperation) C
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *Memory) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *Memory) TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client {
 	b := bucket.NewPlain(section, operation, true, true)
 	i := incrementer.NewMemory()
 
@@ -135,7 +135,7 @@ func (c *Memory) TrackMetricN(section string, operation bucket.MetricOperation, 
 }
 
 // TrackState tracks metric absolute value
-func (c *Memory) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *Memory) TrackState(section string, operation *bucket.MetricOperation, value int) Client {
 	b := bucket.NewPlain(section, operation, true, true)
 	s := state.NewMemory()
 
@@ -176,4 +176,11 @@ func (c *Memory) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Memory) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Memory) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

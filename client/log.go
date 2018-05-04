@@ -55,7 +55,7 @@ func (c *Log) TrackRequest(r *http.Request, t timer.Timer, success bool) Client 
 }
 
 // TrackOperation tracks custom operation
-func (c *Log) TrackOperation(section string, operation bucket.MetricOperation, t timer.Timer, success bool) Client {
+func (c *Log) TrackOperation(section string, operation *bucket.MetricOperation, t timer.Timer, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := &incrementer.Log{}
 
@@ -71,7 +71,7 @@ func (c *Log) TrackOperation(section string, operation bucket.MetricOperation, t
 }
 
 // TrackOperationN tracks custom operation with n diff
-func (c *Log) TrackOperationN(section string, operation bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
+func (c *Log) TrackOperationN(section string, operation *bucket.MetricOperation, t timer.Timer, n int, success bool) Client {
 	b := bucket.NewPlain(section, operation, success, c.unicode)
 	i := &incrementer.Log{}
 
@@ -87,7 +87,7 @@ func (c *Log) TrackOperationN(section string, operation bucket.MetricOperation, 
 }
 
 // TrackMetric tracks custom metric, w/out ok/fail additional sections
-func (c *Log) TrackMetric(section string, operation bucket.MetricOperation) Client {
+func (c *Log) TrackMetric(section string, operation *bucket.MetricOperation) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := &incrementer.Log{}
 
@@ -98,7 +98,7 @@ func (c *Log) TrackMetric(section string, operation bucket.MetricOperation) Clie
 }
 
 // TrackMetricN tracks custom metric with n diff, w/out ok/fail additional sections
-func (c *Log) TrackMetricN(section string, operation bucket.MetricOperation, n int) Client {
+func (c *Log) TrackMetricN(section string, operation *bucket.MetricOperation, n int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	i := &incrementer.Log{}
 
@@ -109,7 +109,7 @@ func (c *Log) TrackMetricN(section string, operation bucket.MetricOperation, n i
 }
 
 // TrackState tracks metric absolute value
-func (c *Log) TrackState(section string, operation bucket.MetricOperation, value int) Client {
+func (c *Log) TrackState(section string, operation *bucket.MetricOperation, value int) Client {
 	b := bucket.NewPlain(section, operation, true, c.unicode)
 	s := &state.Log{}
 
@@ -147,4 +147,11 @@ func (c *Log) SetHTTPRequestSection(section string) Client {
 // ResetHTTPRequestSection resets metric section for HTTP Request metrics to default value that is "request"
 func (c *Log) ResetHTTPRequestSection() Client {
 	return c.SetHTTPRequestSection(bucket.SectionRequest)
+}
+
+// Handler returns metrics endpoint for prometheus backend
+func (c *Log) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	})
 }

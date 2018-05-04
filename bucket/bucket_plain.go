@@ -2,10 +2,62 @@ package bucket
 
 import (
 	"strings"
+	"sync"
 )
 
 // MetricOperation is a list of metric operations to use for metric
-type MetricOperation [3]string
+type MetricOperation struct {
+	sync.Mutex
+
+	operations []string
+	Labels     map[string]string
+}
+
+// NewMetricOperation  builds and returns new MetricOperation instance with defined label keys
+func NewMetricOperation(operations ...string) *MetricOperation {
+	ops := []string{MetricEmptyPlaceholder, MetricEmptyPlaceholder, MetricEmptyPlaceholder}
+
+	opsLen := len(operations)
+	switch {
+	case opsLen >= MetricOperationsMaxLength:
+		ops[0] = operations[0]
+		ops[1] = operations[1]
+		ops[2] = operations[2]
+	case opsLen < 3:
+		for i := 0; i < opsLen; i++ {
+			ops[i] = operations[i]
+		}
+	}
+	return &MetricOperation{operations: ops}
+}
+
+// WithLabels adds label value to existing MetricOperation instance
+func (m *MetricOperation) WithLabels(labels map[string]string) *MetricOperation {
+
+	if m.Labels == nil {
+		m.Labels = labels
+		return m
+	}
+
+	for k := range m.Labels {
+		m.Labels[k] = ""
+	}
+
+	m.Lock()
+	defer m.Unlock()
+
+	for k := range labels {
+		if _, ok := m.Labels[k]; !ok {
+			// TODO: handle error properly
+		} else {
+			if _, ok := labels[k]; ok {
+				m.Labels[k] = labels[k]
+			}
+		}
+	}
+
+	return m
+}
 
 // Plain struct in an implementation of Bucket interface that produces metric names for given section and operation
 type Plain struct {
@@ -15,9 +67,9 @@ type Plain struct {
 }
 
 // NewPlain builds and returns new Plain instance
-func NewPlain(section string, operation MetricOperation, success, uniDecode bool) *Plain {
-	operationSanitized := make([]string, cap(operation))
-	for k, v := range operation {
+func NewPlain(section string, operation *MetricOperation, success, uniDecode bool) *Plain {
+	operationSanitized := make([]string, cap(operation.operations))
+	for k, v := range operation.operations {
 		operationSanitized[k] = SanitizeMetricName(v, uniDecode)
 	}
 	return &Plain{SanitizeMetricName(section, uniDecode), strings.Join(operationSanitized, "."), success}

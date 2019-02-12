@@ -54,6 +54,11 @@ func (c *Prometheus) Close() error {
 	return nil
 }
 
+// prepareMetric adds namespace to metric
+func (c *Prometheus) prepareMetric(metric string) string {
+	return c.namespace + "_" + metric
+}
+
 // getIncrementer calls incrementer factory if incrementer was not created before
 func (c *Prometheus) getIncrementer(name string) incrementer.Incrementer {
 	c.Lock()
@@ -126,6 +131,8 @@ func (c *Prometheus) TrackRequest(r *http.Request, t timer.Timer, success bool) 
 
 	labels := map[string]string{"success": strconv.FormatBool(success), "action": r.Method}
 
+	metric = c.prepareMetric(metric)
+	metricTotal = c.prepareMetric(metricTotal)
 	metricInc.Increment(metric, labels)
 	metricTotalInc.Increment(metricTotal, labels)
 
@@ -147,7 +154,7 @@ func (c *Prometheus) TrackOperation(section string, operation *bucket.MetricOper
 	if nil != t {
 		var values []string
 
-		h := c.getHistogram(b.Metric(), operation.Labels)
+		h := c.getHistogram(c.prepareMetric(b.Metric()), operation.Labels)
 		for _, value := range operation.Labels {
 			values = append(values, value)
 		}
@@ -172,7 +179,7 @@ func (c *Prometheus) TrackOperationN(section string, operation *bucket.MetricOpe
 	if nil != t {
 		var values []string
 
-		h := c.getHistogram(b.Metric(), operation.Labels)
+		h := c.getHistogram(c.prepareMetric(b.Metric()), operation.Labels)
 		for _, value := range operation.Labels {
 			values = append(values, value)
 		}
@@ -191,6 +198,8 @@ func (c *Prometheus) TrackMetric(section string, operation *bucket.MetricOperati
 	metricInc := c.getIncrementer(metric)
 	metricTotalInc := c.getIncrementer(metricTotal)
 
+	metric = c.prepareMetric(metric)
+	metricTotal = c.prepareMetric(metricTotal)
 	metricInc.Increment(metric, operation.Labels)
 	metricTotalInc.Increment(metricTotal, operation.Labels)
 
@@ -206,6 +215,8 @@ func (c *Prometheus) TrackMetricN(section string, operation *bucket.MetricOperat
 	metricInc := c.getIncrementer(metric)
 	metricTotalInc := c.getIncrementer(metricTotal)
 
+	metric = c.prepareMetric(metric)
+	metricTotal = c.prepareMetric(metricTotal)
 	metricInc.IncrementN(metric, n, operation.Labels)
 	metricTotalInc.IncrementN(metricTotal, n, operation.Labels)
 
@@ -219,6 +230,7 @@ func (c *Prometheus) TrackState(section string, operation *bucket.MetricOperatio
 
 	st := c.getState(metric)
 
+	metric = c.prepareMetric(metric)
 	st.Set(metric, value, operation.Labels)
 
 	return c

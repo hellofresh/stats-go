@@ -15,13 +15,12 @@ type Prometheus struct {
 
 // NewPrometheus builds and returns new Prometheus instance
 func NewPrometheus(section string, operation *MetricOperation, success, uniDecode bool) *Prometheus {
-	operationSanitized := make([]string, cap(operation.operations))
-	for k, v := range operation.operations {
-		operationSanitized[k] = sanitizeMetricName(v, uniDecode)
-
+	operationSanitized := make([]string, 0, len(operation.operations))
+	for _, v := range operation.operations {
+		sanitizedMetricName := sanitizeMetricName(v, uniDecode)
 		// prometheus doesn't allow _ in then end of metric name
-		if operationSanitized[k] == "" {
-			operationSanitized = append(operationSanitized[:k], operationSanitized[k+1:]...)
+		if sanitizedMetricName != "" {
+			operationSanitized = append(operationSanitized, sanitizedMetricName)
 		}
 	}
 

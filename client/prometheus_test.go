@@ -154,7 +154,7 @@ func TestPrometheusClient_TrackMetric(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 2, m.inc.incrementMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementMethodMetrics)
 	assert.Equal(t, []map[string]string{}, m.inc.incrementMethodLabels)
 }
 
@@ -167,7 +167,7 @@ func TestPrometheusClient_TrackMetricIncrementsAlreadyExists(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 4, m.inc.incrementMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section", "section_foo_bar_baz", "total_section"}, m.inc.incrementMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section", "namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementMethodMetrics)
 	assert.Equal(t, []map[string]string{}, m.inc.incrementMethodLabels)
 
 	assert.Equal(t, 0, m.inc.incrementNMethodCalled)
@@ -186,7 +186,7 @@ func TestPrometheusClient_TrackMetricN(t *testing.T) {
 	assert.Equal(t, 0, m.inc.incrementMethodCalled)
 
 	assert.Equal(t, 2, m.inc.incrementNMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementNMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementNMethodMetrics)
 	assert.Equal(t, []map[string]string{}, m.inc.incrementNMethodLabels)
 
 	assert.Equal(t, 0, m.inc.incrementALlMethodCalled)
@@ -201,7 +201,7 @@ func TestPrometheusClient_TrackState(t *testing.T) {
 	assert.Equal(t, 1, s.createMethodCalled)
 
 	assert.Equal(t, 1, s.s.setMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz"}, s.s.setMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz"}, s.s.setMethodMetrics)
 	assert.Equal(t, []int{888}, s.s.setMethodNumbers)
 	assert.Equal(t, []map[string]string{}, s.s.setMethodLabels)
 }
@@ -215,7 +215,7 @@ func TestPrometheusClient_TrackStateAlreadyExists(t *testing.T) {
 	assert.Equal(t, 1, s.createMethodCalled)
 
 	assert.Equal(t, 2, s.s.setMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "section_foo_bar_baz"}, s.s.setMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_section_foo_bar_baz"}, s.s.setMethodMetrics)
 	assert.Equal(t, []int{888, 888}, s.s.setMethodNumbers)
 	assert.Equal(t, []map[string]string{}, s.s.setMethodLabels)
 }
@@ -230,7 +230,7 @@ func TestPrometheusClient_TrackOperation(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 2, m.inc.incrementMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}}, m.inc.incrementMethodLabels)
 }
 
@@ -247,11 +247,11 @@ func TestPrometheusClient_TrackOperationWithTimer(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 2, m.inc.incrementMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}}, m.inc.incrementMethodLabels)
 
-	assert.NotNil(t, p.histograms["section_foo_bar_baz"])
-	_, err := p.histograms["section_foo_bar_baz"].GetMetricWithLabelValues("true")
+	assert.NotNil(t, p.histograms["namespace_section_foo_bar_baz"])
+	_, err := p.histograms["namespace_section_foo_bar_baz"].GetMetricWithLabelValues("true")
 	assert.Nil(t, err)
 }
 
@@ -266,7 +266,7 @@ func TestPrometheusClient_TrackOperationAlreadyExists(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 4, m.inc.incrementMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section", "section_foo_bar_baz", "total_section"}, m.inc.incrementMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section", "namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}, {"success": "false"}, {"success": "false"}}, m.inc.incrementMethodLabels)
 }
 
@@ -280,7 +280,7 @@ func TestPrometheusClient_TrackOperationN(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 2, m.inc.incrementNMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementNMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementNMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}}, m.inc.incrementNMethodLabels)
 }
 
@@ -296,11 +296,11 @@ func TestPrometheusClient_TrackOperationNWithTimer(t *testing.T) {
 
 	assert.Equal(t, 2, m.createMethodCalled)
 	assert.Equal(t, 2, m.inc.incrementNMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section"}, m.inc.incrementNMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementNMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}}, m.inc.incrementNMethodLabels)
 
-	assert.NotNil(t, p.histograms["section_foo_bar_baz"])
-	_, err := p.histograms["section_foo_bar_baz"].GetMetricWithLabelValues("true")
+	assert.NotNil(t, p.histograms["namespace_section_foo_bar_baz"])
+	_, err := p.histograms["namespace_section_foo_bar_baz"].GetMetricWithLabelValues("true")
 	assert.Nil(t, err)
 
 }
@@ -316,6 +316,6 @@ func TestPrometheusClient_TrackOperationNAlreadyExists(t *testing.T) {
 	assert.Equal(t, 2, m.createMethodCalled)
 
 	assert.Equal(t, 4, m.inc.incrementNMethodCalled)
-	assert.Equal(t, []string{"section_foo_bar_baz", "total_section", "section_foo_bar_baz", "total_section"}, m.inc.incrementNMethodMetrics)
+	assert.Equal(t, []string{"namespace_section_foo_bar_baz", "namespace_total_section", "namespace_section_foo_bar_baz", "namespace_total_section"}, m.inc.incrementNMethodMetrics)
 	assert.Equal(t, []map[string]string{{"success": "true"}, {"success": "true"}, {"success": "false"}, {"success": "false"}}, m.inc.incrementNMethodLabels)
 }

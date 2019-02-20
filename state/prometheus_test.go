@@ -10,20 +10,20 @@ import (
 type GaugeMock struct {
 	prometheus.Metric
 	prometheus.Collector
-	addCalled      bool
-	addCalledValue float64
+	setCalled      bool
+	setCalledValue float64
 }
 
-func (c *GaugeMock) Set(float64) {}
+func (c *GaugeMock) Set(n float64) {
+	c.setCalled = true
+	c.setCalledValue = n
+}
 
 func (c *GaugeMock) Inc() {}
 
 func (c *GaugeMock) Dec() {}
 
-func (c *GaugeMock) Add(n float64) {
-	c.addCalled = true
-	c.addCalledValue = n
-}
+func (c *GaugeMock) Add(float64) {}
 
 func (c *GaugeMock) Sub(float64) {}
 
@@ -72,8 +72,8 @@ func TestPrometheus_Set(t *testing.T) {
 	s.Set(metric1, metricState1)
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 0, len(m.mock.values))
-	assert.Equal(t, true, m.mock.gaugeMock.addCalled)
-	assert.Equal(t, float64(10), m.mock.gaugeMock.addCalledValue)
+	assert.Equal(t, true, m.mock.gaugeMock.setCalled)
+	assert.Equal(t, float64(10), m.mock.gaugeMock.setCalledValue)
 }
 
 func TestPrometheus_SetWithLabels(t *testing.T) {
@@ -86,6 +86,6 @@ func TestPrometheus_SetWithLabels(t *testing.T) {
 	s.Set(metric1, metricState1, map[string]string{"key1": "value1"})
 	assert.Equal(t, 1, m.mock.withLabelValuesCalls)
 	assert.Equal(t, 1, len(m.mock.values))
-	assert.Equal(t, true, m.mock.gaugeMock.addCalled)
-	assert.Equal(t, float64(10), m.mock.gaugeMock.addCalledValue)
+	assert.Equal(t, true, m.mock.gaugeMock.setCalled)
+	assert.Equal(t, float64(10), m.mock.gaugeMock.setCalledValue)
 }

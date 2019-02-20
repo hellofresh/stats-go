@@ -86,5 +86,5 @@ func (s *Prometheus) Set(metric string, n int, labels ...map[string]string) {
 		s.gauge = s.gaugeFactory.Create(metric, labelNames)
 	}
 
-	s.gauge.WithLabelValues(labelValues...).Add(float64(n))
+	s.gauge.WithLabelValues(labelValues...).Set(float64(n))
 }

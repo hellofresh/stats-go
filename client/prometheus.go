@@ -12,6 +12,7 @@ import (
 	"github.com/hellofresh/stats-go/state"
 	"github.com/hellofresh/stats-go/timer"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Prometheus is Client implementation for prometheus
@@ -266,5 +267,5 @@ func (c *Prometheus) ResetHTTPRequestSection() Client {
 
 // Handler returns metrics endpoint for prometheus backend
 func (c *Prometheus) Handler() http.Handler {
-	return prometheus.Handler()
+	return promhttp.Handler()
 }

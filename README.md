@@ -11,6 +11,12 @@
 [![GoDoc](https://godoc.org/github.com/hellofresh/stats-go?status.svg)](https://godoc.org/github.com/hellofresh/stats-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/stats-go)](https://goreportcard.com/report/github.com/hellofresh/stats-go)
 
+---
+
+**Note:** This project is in maintenance mode. There can be bug fixes, but no feature development.
+
+---
+
 > Generic Stats library written in Go
 
 This is generic stats library that we at HelloFresh use in our projects to collect services' stats and then create monitoring

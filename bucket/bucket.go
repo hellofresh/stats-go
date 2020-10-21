@@ -3,7 +3,7 @@ package bucket
 import (
 	"strings"
 
-	"github.com/fiam/gounidecode/unidecode"
+	"github.com/rainycape/unidecode"
 )
 
 const (

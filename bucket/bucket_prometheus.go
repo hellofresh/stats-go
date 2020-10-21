@@ -3,7 +3,7 @@ package bucket
 import (
 	"strings"
 
-	"github.com/fiam/gounidecode/unidecode"
+	"github.com/rainycape/unidecode"
 )
 
 // Prometheus struct in an implementation of Bucket interface that produces metric names with labels for given section and operation
